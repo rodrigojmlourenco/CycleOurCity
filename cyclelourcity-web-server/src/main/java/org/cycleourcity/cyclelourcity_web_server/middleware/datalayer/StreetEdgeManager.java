@@ -8,8 +8,7 @@ import org.cycleourcity.cyclelourcity_web_server.database.StreetEdgesDriver;
 import org.cycleourcity.cyclelourcity_web_server.database.TripsDriver;
 import org.cycleourcity.cyclelourcity_web_server.database.exception.StreetEdgeNotFoundException;
 import org.cycleourcity.cyclelourcity_web_server.datatype.GeoLocation;
-import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedElevationEdge;
-import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedSafetyEdge;
+import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedTripEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.Trip;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
@@ -34,7 +33,7 @@ public class StreetEdgeManager implements StreetEdgeManagement{
 	}
 
 	@Override
-	public List<SimplifiedElevationEdge> getStreetEdgesWithElevation() {
+	public List<SimplifiedStreetEdge> getStreetEdgesWithElevation() {
 	
 		try {
 			return streetEdgesDriver.getAllStreetEdgesWithElevation();
@@ -45,7 +44,7 @@ public class StreetEdgeManager implements StreetEdgeManagement{
 	}
 
 	@Override
-	public List<SimplifiedSafetyEdge> getStreetEdgesWithSafety() {
+	public List<SimplifiedStreetEdge> getStreetEdgesWithSafety() {
 		try {
 			return streetEdgesDriver.getAllStreetEdgesWithSafety();
 		} catch (SQLException e) {
