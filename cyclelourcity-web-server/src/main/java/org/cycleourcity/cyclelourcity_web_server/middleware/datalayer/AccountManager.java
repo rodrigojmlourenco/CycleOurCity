@@ -12,11 +12,14 @@ import org.cycleourcity.cyclelourcity_web_server.database.exception.UnknownUserI
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.EmailAlreadyRegisteredException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.ExpiredTokenException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.InvalidEmailException;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.InvalidIdentifierException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.InvalidPasswordException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.NonMatchingPasswordsException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.PasswordReuseException;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToRegisterUserException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToUnregisterUserException;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknownUserException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UserRegistryException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UsernameAlreadyRegisteredException;
 import org.cycleourcity.cyclelourcity_web_server.utils.FormFieldValidator;
@@ -62,20 +65,22 @@ public class AccountManager implements AccountManagementLayer{
 			throws InvalidEmailException, InvalidUsernameException, InvalidPasswordException, UsernameAlreadyRegisteredException, EmailAlreadyRegisteredException, NonMatchingPasswordsException{
 		
 		if(!FormFieldValidator.isValidEmail(email))
-			throw new InvalidEmailException();
+			throw new InvalidEmailException(email);
 
 		if(!FormFieldValidator.isValidUsername(username))
-			throw new InvalidUsernameException();
+			throw new InvalidUsernameException(username);
 
-		if(!FormFieldValidator.isValidPassword(pass1) 
-				|| !FormFieldValidator.isValidPassword(pass2))
-			throw new InvalidPasswordException();
+		if(!FormFieldValidator.isValidPassword(pass1)) 
+			throw new InvalidPasswordException(pass1);
+		
+		if(!FormFieldValidator.isValidPassword(pass2))
+			throw new InvalidPasswordException(pass2);
 
 		if(isUsernameRegistered(username))
-			throw new UsernameAlreadyRegisteredException();
+			throw new UsernameAlreadyRegisteredException(username);
 
 		if(isEmailRegistered(email))
-			throw new EmailAlreadyRegisteredException();
+			throw new EmailAlreadyRegisteredException(email);
 
 		if(!pass1.equals(pass2))
 			throw new NonMatchingPasswordsException();
@@ -84,16 +89,19 @@ public class AccountManager implements AccountManagementLayer{
 	
 
 	@Override
-	public String registerUser(String username, String email, String pass1, String pass2) throws UserRegistryException, NonMatchingPasswordsException, UnableToRegisterUserException {
+	public String registerUser(String username, String email, String pass1, String pass2) 
+			throws UserRegistryException, NonMatchingPasswordsException, 
+			UnableToRegisterUserException, UnableToPerformOperation {
 		
 		// 1 - Validate the security of the provided fields.
 		validateFields(username, email, pass1, pass2);
 		
 		// 2 - Secure the password
-		byte[] salt = SecurityUtils.generateSalt(SALT_SIZE);
+		String salt;
 		byte[] hashedPassword;
 		try {
-			hashedPassword=  SecurityUtils.getSecureHash(HASHING_ITERATIONS, pass1, salt);
+			salt = new String(SecurityUtils.generateSalt(SALT_SIZE), "UTF-8");
+			hashedPassword=  SecurityUtils.getSecureHash(HASHING_ITERATIONS, pass1, salt.getBytes());
 		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 			throw new UnableToRegisterUserException();
@@ -102,10 +110,12 @@ public class AccountManager implements AccountManagementLayer{
 		// 3 - Create new user entry
 		boolean success = false;
 		try {
-			success = driver.insertUser(username, email, new String(hashedPassword), new String(salt));
+			success = driver.insertUser(username, email, new String(hashedPassword, "UTF-8"), salt);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new UnableToRegisterUserException();
+		} catch (UnsupportedEncodingException e) {
+			throw new UnableToPerformOperation(e.getMessage());
 		}finally {
 			if(!success) throw new UnableToRegisterUserException();
 		}
@@ -119,7 +129,7 @@ public class AccountManager implements AccountManagementLayer{
 			token = SecurityUtils.generateSecureActivationToken(25);
 			byte[] hashedToken = SecurityUtils.hashSHA1(token);
 			
-			success = driver.insertValidationRequest(userID, new String(hashedToken));
+			success = driver.insertValidationRequest(userID, new String(hashedToken, "UTF-8"));
 			
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -127,6 +137,8 @@ public class AccountManager implements AccountManagementLayer{
 		} catch (SQLException e) {
 			e.printStackTrace();
 			success = false;
+		} catch (UnsupportedEncodingException e) {
+			throw new UnableToPerformOperation(e.getMessage());
 		} 
 		
 		try{
@@ -143,38 +155,27 @@ public class AccountManager implements AccountManagementLayer{
 	}
 
 	@Override
-	public boolean unregisterUser(String identifier, String password) throws UnableToUnregisterUserException, NonMatchingPasswordsException {
-		
-		String salt;
-		int userID = -1;
-		
-		// 1 - Validate User
+	public boolean unregisterUser(String identifier, String password) 
+			throws UnableToUnregisterUserException, NonMatchingPasswordsException {
+
 		try{
 			
-			if(FormFieldValidator.isValidEmail(identifier))
-				userID = driver.getUserIDfromEmail(identifier);
-			else if(FormFieldValidator.isValidUsername(identifier))
-				userID = driver.getUserIDfromUsername(identifier);
-			else throw new UnableToUnregisterUserException();
+			int userID = getUserID(identifier);
 			
-			salt = driver.getUserSalt(userID);
-			
-			byte[] hashedPass = SecurityUtils.getSecureHash(HASHING_ITERATIONS, password, salt.getBytes());
-			
-			if(!driver.hasMatchingPassword(userID, new String(hashedPass)))
-				throw new NonMatchingPasswordsException();
-			else
+			if(isValidPassword(identifier, password))
 				return driver.deleteUser(userID);
+			else
+				throw new NonMatchingPasswordsException();
 					
 		}catch(SQLException e){
 			e.printStackTrace();
-			throw new UnableToUnregisterUserException();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			throw new UnableToUnregisterUserException();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			throw new UnableToUnregisterUserException();
+			throw new UnableToUnregisterUserException(identifier, e.getMessage());
+		} catch (InvalidIdentifierException e) {
+			throw new UnableToUnregisterUserException(identifier, e.getMessage());
+		} catch (UnableToPerformOperation e) {
+			throw new UnableToUnregisterUserException(identifier, e.getMessage());
+		} catch (UnknownUserException e) {
+			throw new UnableToUnregisterUserException(identifier, e.getMessage());
 		}
 	}
 
@@ -190,28 +191,31 @@ public class AccountManager implements AccountManagementLayer{
 	}
 
 	@Override
-	public boolean activateAccount(String token) throws ExpiredTokenException {
+	public boolean activateAccount(String token) throws ExpiredTokenException, UnableToPerformOperation {
 		
 		try {
 			byte[] hashedToken = SecurityUtils.hashSHA1(token);
+			String tokenHashAsString = new String(hashedToken, "UTF-8");
 			
-			if(driver.isTokenExpired(new String(hashedToken)))
+			if(driver.isTokenExpired(tokenHashAsString))
 				throw new ExpiredTokenException();
 			
-			int activationID = driver.getTokenActivationID(token);
+			int activationID = driver.getTokenActivationID(tokenHashAsString);
 			
 			return driver.deleteRequest(activationID);
 			
+			
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			throw new UnableToPerformOperation(e.getMessage());
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new UnableToPerformOperation(e.getMessage());
 		} catch (NoSuchTokenException e) {
 			e.printStackTrace();
 			throw new ExpiredTokenException();
+		} catch (UnsupportedEncodingException e) {
+			throw new UnableToPerformOperation(e.getMessage());
+			
 		} 
-		
-		return false;
 	}
 
 	@Override
@@ -234,16 +238,16 @@ public class AccountManager implements AccountManagementLayer{
 			original= driver.getUserPasswordHash(userID);
 			salt	= driver.getUserSalt(userID);
 			
-			oldPass = new String(SecurityUtils.getSecureHash(HASHING_ITERATIONS, oldPass, salt.getBytes()));
+			oldPass = new String(SecurityUtils.getSecureHash(HASHING_ITERATIONS, oldPass, salt.getBytes("UTF-8")), "UTF-8");
 			
 			if(!original.equals(oldPass) || !newPass.equals(confirmPass))
 				throw new NonMatchingPasswordsException();
 			
 			
 			newSalt = SecurityUtils.generateSalt(SALT_SIZE);
-			newPass = new String(SecurityUtils.getSecureHash(HASHING_ITERATIONS, newPass, newSalt));
+			newPass = new String(SecurityUtils.getSecureHash(HASHING_ITERATIONS, newPass, newSalt), "UTF-8");
 			
-			return driver.updatePassword(userID, newPass, new String(newSalt));
+			return driver.updatePassword(userID, newPass, new String(newSalt, "UTF-8"));
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -258,7 +262,7 @@ public class AccountManager implements AccountManagementLayer{
 	}
 
 	@Override
-	public String recoverPassword(String email) throws UnknownUserIdentifierException {
+	public String recoverPassword(String email) throws UnknownUserIdentifierException, UnableToPerformOperation {
 		
 		int userID;
 		String token;
@@ -268,7 +272,7 @@ public class AccountManager implements AccountManagementLayer{
 			if(userID == -1) throw new UnknownUserIdentifierException();
 			
 			token = SecurityUtils.generateSecureActivationToken(TOKEN_SIZE);
-			String tokenHash = new String(SecurityUtils.hashSHA1(token));
+			String tokenHash = new String(SecurityUtils.hashSHA1(token), "UTF-8");
 			
 			driver.insertPasswordRecoveryRequest(userID, tokenHash);
 			return token;
@@ -277,7 +281,9 @@ public class AccountManager implements AccountManagementLayer{
 			e.printStackTrace();
 			
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			throw new UnableToPerformOperation(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			throw new UnableToPerformOperation(e.getMessage());
 		}
 		
 		return null;
@@ -300,6 +306,57 @@ public class AccountManager implements AccountManagementLayer{
 	public boolean logout() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public int getUserID(String identifier) throws UnknownUserException, UnableToPerformOperation {
+		
+		int UID;
+		try{
+			if(FormFieldValidator.isValidEmail(identifier))
+				UID =  driver.getUserIDfromEmail(identifier);
+			else if(FormFieldValidator.isValidUsername(identifier))
+				UID = driver.getUserIDfromUsername(identifier);
+			else
+				throw new UnableToPerformOperation("Invalid identifier.");
+			
+			if(UID <= -1)
+				throw new UnknownUserException(identifier);
+			else
+				return UID;
+			
+		}catch(SQLException e){
+			throw new UnableToPerformOperation(e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean isValidPassword(String identifier, String password) throws InvalidIdentifierException, UnableToPerformOperation {
+		
+		int userID;
+		String salt;
+		
+		try{
+		if(FormFieldValidator.isValidEmail(identifier))
+			userID = driver.getUserIDfromEmail(identifier);
+		else if(FormFieldValidator.isValidUsername(identifier))
+			userID = driver.getUserIDfromUsername(identifier);
+		else 
+			throw new InvalidIdentifierException(identifier);
+		
+		salt = driver.getUserSalt(userID);
+		
+		byte[] hashedPass = SecurityUtils.getSecureHash(HASHING_ITERATIONS, password, salt.getBytes("UTF-8"));
+		
+		return driver.hasMatchingPassword(userID, new String(hashedPass, "UTF-8"));
+		
+		}catch(SQLException e){
+			throw new UnableToPerformOperation(e.getMessage());
+		} catch (NoSuchAlgorithmException e) {
+			throw new UnableToPerformOperation(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			throw new UnableToPerformOperation(e.getMessage());
+		}
 	}
 
 }

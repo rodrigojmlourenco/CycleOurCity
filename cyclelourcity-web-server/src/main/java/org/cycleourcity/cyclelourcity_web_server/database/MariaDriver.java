@@ -25,7 +25,7 @@ import org.opentripplanner.routing.edgetype.StreetEdge;
 
 //TODO: commits devem passar a ser uma função explicita. Esta passa assim a ser invocadas por classes de topo.
 
-public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
+public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver, TestDriver{
 
 
 	private final static MariaDriver DRIVER = new MariaDriver();
@@ -33,14 +33,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 	private Connection conn;
 
 	//TODO: isto não deve ir parar ao repositório!!!
-	private final String database = "UsersClassifications";
-	private final String username = "root";
-	private final String password = "admin613SHH";
+	private final String DATABASE = "UsersClassifications";
+	private final String USERNAME = "root";
+	private final String PASSWORD = "admin613SSH";
 
 	private MariaDriver(){
 
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+database, username, password);
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+DATABASE+"?characterEncoding=utf8", USERNAME, PASSWORD);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -66,14 +66,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO users (Username, Email, Password, Salt) "+
 						"VALUES (?,?,?,?)");
 		
-		statement.setString(0, username);
-		statement.setString(1, email);
-		statement.setString(2, password);
-		statement.setString(3, salt);
+		statement.setString(1, username);
+		statement.setString(2, email);
+		statement.setString(3, passwordHash);
+		statement.setString(4, salt);
 
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -83,10 +82,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		PreparedStatement statement = 
 				conn.prepareStatement("DELETE FROM users WHERE Id=?");
 		
-		statement.setInt(0, userID);
+		statement.setInt(1, userID);
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 		
@@ -99,12 +97,11 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"DELETE FROM users "
 						+ "WHERE Username=? OR Email=?");
 		
-		statement.setString(0, identifier);
 		statement.setString(1, identifier);
+		statement.setString(2, identifier);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -117,15 +114,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO users_emails (IdUser, RecoveryPassword, Token, ExpirationDate) "
 						+ "VALUES (?,?,?,?)");
 		
-		statement.setInt(0, userID);
-		if(isRecovery) statement.setInt(1, 1);
-		else statement.setInt(1, 0);
-		statement.setString(2, token);
-		statement.setDate(3, (java.sql.Date) SecurityUtils.getExpirationDate(1));
+		statement.setInt(1, userID);
+		if(isRecovery) statement.setInt(2, 1);
+		else statement.setInt(2, 0);
+		statement.setString(3, token);
+		statement.setDate(4, new java.sql.Date(SecurityUtils.getExpirationDate(1).getTime()) );
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -140,10 +136,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		PreparedStatement statement =
 				conn.prepareStatement("DELETE FROM users_emails WHERE Id=?");
 		
-		statement.setInt(0, activationID);
+		statement.setInt(1, activationID);
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -161,13 +156,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"UPDATE users SET Password=?, Salt=? WHERE userID = ?");
 		
-		statement.setString(0, passwordHash);
-		statement.setString(1, salt);
-		statement.setInt(2, userID);
+		statement.setString(1, passwordHash);
+		statement.setString(2, salt);
+		statement.setInt(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -178,12 +172,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		PreparedStatement statement =
 				conn.prepareStatement("SELECT Id FROM users WHERE username = ?");
 		
-		statement.setString(0, username);
+		statement.setString(1, username);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next()){
-			return set.getInt("Id");
+			return set.getInt(1);
 		}else 
 			return -1;
 	}
@@ -250,7 +244,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM users_emails "
 						+ "WHERE ExpirationDate < ?");
 		
-		statement.setDate(0, new java.sql.Date((new Date()).getTime()));
+		statement.setDate(1, new java.sql.Date((new Date()).getTime()));
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -269,7 +263,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM users_emails "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(0, activationID);
+		statement.setInt(1, activationID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -288,12 +282,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM users_emails "
 						+ "WHERE Token = ? AND RecoveryPassword = '0'");
 		
-		statement.setString(0, token);
+		statement.setString(1, token);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return set.getInt(0);
+			return set.getInt(1);
 		else
 			throw new NoSuchTokenException();
 		
@@ -307,12 +301,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM users "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(0, userID);
+		statement.setInt(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return set.getString(0);
+			return set.getString(1);
 		else
 			throw new UnknownUserIdentifierException();
 					
@@ -324,7 +318,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT * FROM users WHERE Username=?");
 
-		statement.setString(0, username);
+		statement.setString(1, username);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 
@@ -336,7 +330,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT * FROM users WHERE Email=?");
 
-		statement.setString(0, username);
+		statement.setString(1, email);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 
@@ -350,7 +344,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"SELECT IdUser FROM users_emails WHERE IdUser = ? AND RecoveryPassword = '0'");
 		
-		statement.setInt(0, userID);
+		statement.setInt(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -362,15 +356,15 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		
 		PreparedStatement statement = 
 				conn.prepareStatement(
-						"SELECT ExpirationDate FROM users_email "
+						"SELECT ExpirationDate FROM users_emails "
 						+ "WHERE Token=? AND RecoveryPassword='0'");
 			
-		statement.setString(0, token);
+		statement.setString(1, token);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next()){
-			long expires = set.getDate(0).getTime();
+			long expires = set.getDate(1).getTime();
 			return (expires - (new Date()).getTime()) <= 0;
 		}else
 			throw new NoSuchTokenException();
@@ -384,15 +378,16 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT salt FROM users WHERE Id = ?");
 		
-		statement.setInt(0, userID);
+		statement.setInt(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return set.getString(0);
+			return set.getString(1);
 		else
 			return null;
 	}
+
 
 	@Override
 	public boolean hasMatchingPassword(int userID, String password) throws SQLException {
@@ -402,13 +397,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM users "
 						+ "WHERE Id = ? AND Password = ?");
 		
-		statement.setInt(0, userID);
-		statement.setString(1, password);
+		statement.setInt(1, userID);
+		statement.setString(2, password);
 		
 		ResultSet set = statement.executeQuery();
 		
 		if(set.next()) return true;
-		else return false;
+		else 
+			return false;
 	}
 
 	/*
@@ -476,12 +472,11 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO trips (IdUser, Name) "
 						+ "VALUES (?,?)");
 		
-		statement.setInt(0, userID);
-		statement.setString(1, name);
+		statement.setInt(1, userID);
+		statement.setString(2, name);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -494,14 +489,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO trips_streetedges (IdTrip, IdStreetEdge, BicycleMode) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(0, tripID);
-		statement.setInt(1, streetEdgeID);
-		if(bicycle) statement.setInt(2, 1);
-		else if(bicycle) statement.setInt(2, 0);
+		statement.setInt(1, tripID);
+		statement.setInt(2, streetEdgeID);
+		if(bicycle) statement.setInt(3, 1);
+		else if(bicycle) statement.setInt(3, 0);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -512,10 +506,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"DELETE FROM trips WHERE Id=?");
 		
-		statement.setInt(0, tripID);
+		statement.setInt(1, tripID);
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -526,10 +519,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"DELETE FROM trips_streetedges WHERE IdTrip=?");
 		
-		statement.setInt(0, tripID);
+		statement.setInt(1, tripID);
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -543,12 +535,11 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"DELETE FROM trips_streetedges "
 						+ "WHERE IdTrip = ? AND IdStreetEdge = ?");
 		
-		statement.setInt(0, tripID);
-		statement.setInt(1, streetEdgeID);
+		statement.setInt(1, tripID);
+		statement.setInt(2, streetEdgeID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -562,12 +553,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"SELECT Id FROM trips WHERE IdUser=?");
 		
-		statement.setInt(0, userID);
+		statement.setInt(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		while(set.next())
-			trips.add(set.getInt(0));
+			trips.add(set.getInt(1));
 		
 		return trips;
 	}
@@ -583,12 +574,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM trips_streetedges "
 						+ "WHERE IdTrip = ?");
 		
-		statement.setInt(0, tripID);
+		statement.setInt(1, tripID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		while(set.next())
-			streetEdges.add(set.getInt(0));
+			streetEdges.add(set.getInt(1));
 		
 		return streetEdges;
 	}
@@ -606,7 +597,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "ON t1.IdStreetEdge = t2.Id "
 						+ "WHERE t1.IdTrip = ?");
 		
-		statement.setInt(0, tripID);
+		statement.setInt(1, tripID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -616,9 +607,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		int streetEdgeID;
 		while(set.next()){
 			
-			streetEdgeID = set.getInt(0);
-			geometry = set.getString(1);
-			bicycle = set.getInt(2) == 1;  
+			streetEdgeID = set.getInt(1);
+			geometry = set.getString(2);
+			bicycle = set.getInt(3) == 1;  
 			
 			streetEdges.add(
 					new SimplifiedTripEdge(streetEdgeID, geometry, bicycle));
@@ -636,8 +627,8 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"SELECT * FROM trips_streetedges "
 						+ "WHERE IdTrip = ? AND IdStreetEdge = ?");
 		
-		statement.setInt(0, tripID);
-		statement.setInt(1, streetEdgeID);
+		statement.setInt(1, tripID);
+		statement.setInt(2, streetEdgeID);
 		
 		ResultSet set = statement.executeQuery();
 		statement.close();
@@ -656,16 +647,15 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO streetedges (Name, FromVertexLatitude, FromVertexLongitude, ToVertexLatitude, ToVertexLongitude, Geometry) "
 						+ "VALUES (?,?,?,?,?,?)");
 		
-		statement.setString(0, name);
-		statement.setDouble(1, from.getLatitude());
-		statement.setDouble(2, from.getLongitude());
-		statement.setDouble(3, to.getLatitude());
-		statement.setDouble(4, to.getLongitude());
-		statement.setString(5, geometry);
+		statement.setString(1, name);
+		statement.setDouble(2, from.getLatitude());
+		statement.setDouble(3, from.getLongitude());
+		statement.setDouble(4, to.getLatitude());
+		statement.setDouble(5, to.getLongitude());
+		statement.setString(6, geometry);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 	}
@@ -676,12 +666,11 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"DELETE FROM streetedges WHERE Id=?");
 		
-		statement.setInt(0, streetEdgeID);
+		statement.setInt(1, streetEdgeID);
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
-		return false;
+		return count > 0;
 	}
 
 	@Override
@@ -694,12 +683,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(0, steetEdgeID);
+		statement.setInt(1, steetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return new GeoLocation(set.getFloat(0), set.getFloat(1));
+			return new GeoLocation(set.getFloat(1), set.getFloat(2));
 		else
 			throw new StreetEdgeNotFoundException();
 	}
@@ -714,12 +703,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(0, steetEdgeID);
+		statement.setInt(1, steetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return new GeoLocation(set.getFloat(0), set.getFloat(1));
+			return new GeoLocation(set.getFloat(1), set.getFloat(2));
 		else
 			throw new StreetEdgeNotFoundException();
 	}
@@ -734,12 +723,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(0, steetEdgeID);
+		statement.setInt(1, steetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return set.getString(0);
+			return set.getString(1);
 		else
 			throw new StreetEdgeNotFoundException();
 	}
@@ -754,12 +743,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(0, steetEdgeID);
+		statement.setInt(1, steetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
 		if(set.next())
-			return set.getString(0);
+			return set.getString(1);
 		else
 			throw new StreetEdgeNotFoundException();
 	}
@@ -779,13 +768,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO streetedges_elevation (IdStreetEdge, IdElevation, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(0, streetEdge);
-		statement.setInt(1, factorID);
-		statement.setInt(2, userID);
+		statement.setInt(1, streetEdge);
+		statement.setInt(2, factorID);
+		statement.setInt(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 		
@@ -799,13 +787,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO streetedges_safety (IdStreetEdge, IdSafety, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(0, streetEdge);
-		statement.setInt(1, factorID);
-		statement.setInt(2, userID);
+		statement.setInt(1, streetEdge);
+		statement.setInt(2, factorID);
+		statement.setInt(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 		
@@ -819,13 +806,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO streetedges_pavement (IdStreetEdge, IdPavement, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(0, streetEdge);
-		statement.setInt(1, factorID);
-		statement.setInt(2, userID);
+		statement.setInt(1, streetEdge);
+		statement.setInt(2, factorID);
+		statement.setInt(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 		
@@ -839,13 +825,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						"INSERT INTO streetedges_rails (IdStreetEdge, IdRails, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(0, streetEdge);
-		statement.setInt(1, factorID);
-		statement.setInt(2, userID);
+		statement.setInt(1, streetEdge);
+		statement.setInt(2, factorID);
+		statement.setInt(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
-		conn.commit();
 		
 		return count > 0;
 		
@@ -879,11 +864,11 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 				conn.prepareStatement(
 						"SELECT * FROM "+table+" WHERE IdStreetEdge = ?");
 		
-		statement.setInt(0, streetEdgeID);
+		statement.setInt(1, streetEdgeID);
 		ResultSet set = statement.executeQuery();
 		
 		while(set.next())
-			factors.add(set.getInt(0));
+			factors.add(set.getInt(1));
 		
 		return null;
 	}
@@ -908,8 +893,8 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		String geometry;
 
 		while(set.next()){
-			geometry = set.getString(0);
-			elevationID = set.getInt(1);
+			geometry = set.getString(1);
+			elevationID = set.getInt(2);
 			edges.add(new SimplifiedStreetEdge(elevationID, geometry));
 		}
 		
@@ -930,8 +915,8 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 		String geometry;
 
 		while(set.next()){
-			geometry = set.getString(0);
-			elevationID = set.getInt(1);
+			geometry = set.getString(1);
+			elevationID = set.getInt(2);
 			edges.add(new SimplifiedStreetEdge(elevationID, geometry));
 		}
 		
@@ -949,10 +934,19 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver{
 						+ "ON t1.Id = t2.IdStreetEdge");
 		
 		while(set.next())
-			geometries.add(set.getString(0));
+			geometries.add(set.getString(1));
 		
 		
 		return geometries;
+	}
+
+	@Override
+	public void clearTable(String tablename) throws SQLException {
+		Statement statement = conn.createStatement();
+		statement.executeQuery("Delete from "+tablename);
+		statement.executeQuery("ALTER TABLE "+tablename+" AUTO_INCREMENT = 1");
+		statement.close();
+		
 	}
 
 	

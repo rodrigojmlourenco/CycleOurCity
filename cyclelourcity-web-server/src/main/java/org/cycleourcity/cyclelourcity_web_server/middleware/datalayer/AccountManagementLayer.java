@@ -2,10 +2,13 @@ package org.cycleourcity.cyclelourcity_web_server.middleware.datalayer;
 
 import org.cycleourcity.cyclelourcity_web_server.database.exception.UnknownUserIdentifierException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.ExpiredTokenException;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.InvalidIdentifierException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.NonMatchingPasswordsException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.PasswordReuseException;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToRegisterUserException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToUnregisterUserException;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknownUserException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UserRegistryException;
 
 public interface AccountManagementLayer {
@@ -27,10 +30,11 @@ public interface AccountManagementLayer {
 	 * @throws UserRegistryException If one of the fields is invalid.
 	 * @throws NonMatchingPasswordsException If the passwords do not match.
 	 * @throws UnableToRegisterUserException If the user creation was unsuccessful for some unforseeable event.
+	 * @throws UnableToPerformOperation 
 	 *  
 	 */
 	public String registerUser(String username, String email, String pass1, String pass2)
-		throws UserRegistryException, NonMatchingPasswordsException, UnableToRegisterUserException;
+		throws UserRegistryException, NonMatchingPasswordsException, UnableToRegisterUserException, UnableToPerformOperation;
 	
 	
 	/**
@@ -45,6 +49,17 @@ public interface AccountManagementLayer {
 	 */
 	public boolean unregisterUser(String identifier, String password) throws UnableToUnregisterUserException, NonMatchingPasswordsException;
 	
+	/**
+	 * Fetches a given user's UID.
+	 * 
+	 * @param identifier The user's identification, which may either be his username or email.
+	 * 
+	 * @return The user's UID
+	 * 
+	 * @throws UnknownUserException There is no user registered with the provided identifier.
+	 * @throws UnableToPerformOperation The operation was unsuccessful due to unforseeable reasons.
+	 */
+	public int getUserID(String identifier) throws UnknownUserException, UnableToPerformOperation;
 	
 	//@ActivateAccount.php
 	/**
@@ -64,8 +79,9 @@ public interface AccountManagementLayer {
 	 * @return True if the operation was successful, false otherwise.
 	 * 
 	 * @throws ExpiredTokenException
+	 * @throws UnableToPerformOperation 
 	 */
-	public boolean activateAccount(String token) throws ExpiredTokenException;
+	public boolean activateAccount(String token) throws ExpiredTokenException, UnableToPerformOperation;
 	
 	
 	//@ChangePasswordJSON.php
@@ -74,7 +90,7 @@ public interface AccountManagementLayer {
 
 	//@ForgotPasswordJSON.php
 	public String recoverPassword(String email) 
-			throws UnknownUserIdentifierException;
+			throws UnknownUserIdentifierException, UnableToPerformOperation;
 	
 	//@ResetPassword.php
 	public boolean resetPassword(String username, String token, String newPass, String confirmPass) 
@@ -86,4 +102,6 @@ public interface AccountManagementLayer {
 	//@Logout.php
 	public boolean logout();
 	
+	
+	public boolean isValidPassword(String identifier, String password) throws InvalidIdentifierException, UnableToPerformOperation;
 }

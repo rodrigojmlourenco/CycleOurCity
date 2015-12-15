@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.codec.binary.Base64;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
 import org.joda.time.DateTime;
 
 public class SecurityUtils {
@@ -40,10 +41,10 @@ public class SecurityUtils {
 		return dtPlusOne.toDate();
 	}
 	
-	public static String generateSecureActivationToken(int size){
+	public static String generateSecureActivationToken(int size) throws UnsupportedEncodingException{
 		byte[] token = new byte[size];
 		r.nextBytes(token);
-		return new String(Base64.encodeBase64(token));
+		return new String(token, "UTF-8");
 	}
 	
 	public static byte[] hashSHA1(String s) throws NoSuchAlgorithmException{
