@@ -3,6 +3,7 @@ package org.cycleourcity.cyclelourcity_web_server.middleware.datalayer;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.cycleourcity.cyclelourcity_web_server.database.MariaDriver;
 import org.cycleourcity.cyclelourcity_web_server.database.UsersDriver;
@@ -356,6 +357,16 @@ public class AccountManager implements AccountManagementLayer{
 			throw new UnableToPerformOperation(e.getMessage());
 		} catch (UnsupportedEncodingException e) {
 			throw new UnableToPerformOperation(e.getMessage());
+		}
+	}
+
+	@Override
+	public List<Long> getAllUsersIDs() {
+		try {
+			return driver.getUsersIDs();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 

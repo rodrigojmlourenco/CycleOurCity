@@ -1,5 +1,7 @@
 package org.cycleourcity.cyclelourcity_web_server.middleware.datalayer;
 
+import java.util.List;
+
 import org.cycleourcity.cyclelourcity_web_server.database.exception.UnknownUserIdentifierException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.ExpiredTokenException;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.InvalidIdentifierException;
@@ -104,4 +106,8 @@ public interface AccountManagementLayer {
 	
 	
 	public boolean isValidPassword(String identifier, String password) throws InvalidIdentifierException, UnableToPerformOperation;
+	
+	
+	//BACK-END
+	public List<Long> getAllUsersIDs();
 }

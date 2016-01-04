@@ -24,7 +24,7 @@ public interface StreetEdgesDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean insertStreetEdge(String name, GeoLocation from, GeoLocation to, String geometry) throws SQLException;
+	public boolean insertStreetEdge(Long id, String name, GeoLocation from, GeoLocation to, String geometry) throws SQLException;
 	
 	/**
 	 * Deletes a specific street edge entry.
@@ -130,6 +130,16 @@ public interface StreetEdgesDriver {
 	 * @throws UnsupportedCriterionException 
 	 */
 	public List<Integer> getStreetEdgeClassifications(Criteria criterion, int streetEdgeID) throws SQLException, UnsupportedCriterionException;
+	
+	/**
+	 * Checks if the street edges tables, which characterizes the a city's map,
+	 * is empty or not.
+	 * 
+	 * @return True if it is empty, false otherwise.
+	 * 
+	 * @throws SQLException
+	 */
+	public boolean isEmptyMap() throws SQLException;
 	
 	/**
 	 * Fetches all classification provided by a specific user,

@@ -2,16 +2,16 @@ package org.cycleourcity.cyclelourcity_web_server.datatype;
 
 public class GeoLocation {
 	
-	private final float latitude;
-	private final float longitude;
+	private final double latitude;
+	private final double longitude;
 	
-	public GeoLocation(float latitude, float longitude){
-		this.latitude  = latitude;
-		this.longitude = longitude;
+	public GeoLocation(double d, double e){
+		this.latitude  = d;
+		this.longitude = e;
 	}
 	
-	public float getLatitude(){ return this.latitude; }
+	public double getLatitude(){ return this.latitude; }
 	
-	public float getLongitude(){ return this.longitude; }
+	public double getLongitude(){ return this.longitude; }
 
 }

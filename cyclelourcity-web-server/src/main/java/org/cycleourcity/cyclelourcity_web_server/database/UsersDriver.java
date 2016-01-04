@@ -248,4 +248,7 @@ public interface UsersDriver {
 	 * @throws SQLException
 	 */
 	public boolean updatePassword(int userID, String passwordHash, String salt) throws SQLException;
+	
+	
+	public List<Long> getUsersIDs() throws SQLException;
 }

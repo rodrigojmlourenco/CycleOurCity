@@ -1,0 +1,12 @@
+<config>
+	<repository>
+		<user val='root'/>
+		<password val='admin613SSH'/>
+		<database val='UsersClassifications'/>
+	</repository>	
+	<phase2>
+		<bottom-left lat="38.7260" lon="-9.1620"/>
+		<top-right lat="38.7553" lon="-9.1249"/>
+	</phase2>
+</config>
+

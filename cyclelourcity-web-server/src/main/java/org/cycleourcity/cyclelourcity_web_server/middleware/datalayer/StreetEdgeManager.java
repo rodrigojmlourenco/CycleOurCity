@@ -1,6 +1,7 @@
 package org.cycleourcity.cyclelourcity_web_server.middleware.datalayer;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.cycleourcity.cyclelourcity_web_server.database.MariaDriver;
@@ -11,9 +12,13 @@ import org.cycleourcity.cyclelourcity_web_server.datatype.GeoLocation;
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedTripEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.Trip;
+import org.cycleourcity.cyclelourcity_web_server.datatype.UserRating;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
 import org.cycleourcity.cyclelourcity_web_server.utils.CriteriaUtils.Criteria;
 import org.cycleourcity.cyclelourcity_web_server.utils.exceptions.UnsupportedCriterionException;
+import org.opentripplanner.routing.edgetype.StreetEdge;
+import org.opentripplanner.routing.graph.Graph;
+import org.opentripplanner.routing.graph.Vertex;
 
 public class StreetEdgeManager implements StreetEdgeManagement{
 	
@@ -188,6 +193,130 @@ public class StreetEdgeManager implements StreetEdgeManagement{
 			}
 		}
 		
+		return false;
+	}
+
+	
+	
+	@Override
+	public boolean isEmptyMap(){
+		try {
+			return streetEdgesDriver.isEmptyMap();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public void populateStreetEdges(Graph graph) {
+		
+		int i=0;
+		long id;
+		boolean error = false;;
+		String name, geometry;
+		GeoLocation from, to;
+		Vertex fromV, toV;
+		
+		for(StreetEdge se : graph.getStreetEdges()){
+			
+			id		= se.getId();
+			name 	= se.getName();
+			fromV 	= se.getFromVertex();
+			toV 	= se.getToVertex();
+			from	= new GeoLocation(fromV.getLat(), fromV.getLon());
+			to		= new GeoLocation(toV.getLat(), toV.getLon());
+			geometry= "DIFFERENT FROM OG VERSION";
+			
+			
+			try {
+				streetEdgesDriver.insertStreetEdge(id, name, from, to, geometry);
+				i++;
+			} catch (SQLException e) {
+				error = true;
+				e.printStackTrace();
+			}
+		
+			if((i % 1000) == 0)
+				System.out.print("|");
+		}
+		
+		if(error) 
+			System.out.println("\nNot all street edges were successfully inserted.");
+		else 
+			System.out.println("\nAll "+i+" street edges inserted successfully.");
+		
+	}
+
+	@Override
+	public HashMap<Long, List<UserRating>> getAllSafetyRatings() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HashMap<Long, List<UserRating>> getAllPavementRatings() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HashMap<Long, List<UserRating>> getAllRailsRatings() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public HashMap<Long, List<UserRating>> getAllElevationRatings() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getAllSafetyFactorsIDs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getAllElevationFactorsIDs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getAllPavementFactorsIDs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[] getAllRailsFactorsIDs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean clearAndUpdateConsolidatedElevationRatings(HashMap<Integer, Integer> ratings) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean clearAndUpdateConsolidatedSafetyRatings(HashMap<Integer, Integer> ratings) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean clearAndUpdateConsolidatedPavementRatings(HashMap<Integer, Integer> ratings) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean clearAndUpdateConsolidatedRailsRatings(HashMap<Integer, Integer> ratings) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }

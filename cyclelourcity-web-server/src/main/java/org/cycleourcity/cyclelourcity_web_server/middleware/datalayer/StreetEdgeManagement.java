@@ -1,11 +1,14 @@
 package org.cycleourcity.cyclelourcity_web_server.middleware.datalayer;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.cycleourcity.cyclelourcity_web_server.database.exception.StreetEdgeNotFoundException;
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.Trip;
+import org.cycleourcity.cyclelourcity_web_server.datatype.UserRating;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
+import org.opentripplanner.routing.graph.Graph;
 
 public interface StreetEdgeManagement {
 
@@ -89,4 +92,33 @@ public interface StreetEdgeManagement {
 	 * @throws UnknowStreetEdgeException 
 	 */
 	public boolean classifyStreetEdge(int tripID, int streetEdgeID, int safety, int elevation, int pavement, int rails, int userID, boolean last) throws UnknowStreetEdgeException;
+	
+	//BACK-END
+	public boolean isEmptyMap();
+	
+	public void populateStreetEdges(Graph graph);
+	
+	public HashMap<Long, List<UserRating>> getAllSafetyRatings();
+	
+	public HashMap<Long, List<UserRating>> getAllPavementRatings();
+	
+	public HashMap<Long, List<UserRating>> getAllRailsRatings();
+	
+	public HashMap<Long, List<UserRating>> getAllElevationRatings();
+	
+	public double[] getAllSafetyFactorsIDs();
+	
+	public double[] getAllElevationFactorsIDs();
+	
+	public double[] getAllPavementFactorsIDs();
+	
+	public double[] getAllRailsFactorsIDs();
+	
+	public boolean clearAndUpdateConsolidatedElevationRatings(HashMap<Integer, Integer> ratings);
+	
+	public boolean clearAndUpdateConsolidatedSafetyRatings(HashMap<Integer, Integer> ratings);
+	
+	public boolean clearAndUpdateConsolidatedPavementRatings(HashMap<Integer, Integer> ratings);
+	
+	public boolean clearAndUpdateConsolidatedRailsRatings(HashMap<Integer, Integer> ratings);
 }

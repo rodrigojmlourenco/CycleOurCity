@@ -23,7 +23,6 @@ import org.cycleourcity.cyclelourcity_web_server.utils.SecurityUtils;
 import org.cycleourcity.cyclelourcity_web_server.utils.exceptions.UnsupportedCriterionException;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 
-//TODO: commits devem passar a ser uma função explicita. Esta passa assim a ser invocadas por classes de topo.
 
 public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver, TestDriver{
 
@@ -639,20 +638,21 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	/////////////////////////////////////////////////////////
 
 	@Override
-	public boolean insertStreetEdge(String name, GeoLocation from, GeoLocation to, String geometry)
+	public boolean insertStreetEdge(Long id, String name, GeoLocation from, GeoLocation to, String geometry)
 			throws SQLException {
 		
 		PreparedStatement statement =
 				conn.prepareStatement(
-						"INSERT INTO streetedges (Name, FromVertexLatitude, FromVertexLongitude, ToVertexLatitude, ToVertexLongitude, Geometry) "
-						+ "VALUES (?,?,?,?,?,?)");
+						"INSERT INTO streetedges (Id, Name, FromVertexLatitude, FromVertexLongitude, ToVertexLatitude, ToVertexLongitude, Geometry) "
+						+ "VALUES (?,?,?,?,?,?,?)");
 		
-		statement.setString(1, name);
-		statement.setDouble(2, from.getLatitude());
-		statement.setDouble(3, from.getLongitude());
-		statement.setDouble(4, to.getLatitude());
-		statement.setDouble(5, to.getLongitude());
-		statement.setString(6, geometry);
+		statement.setLong(1, id);
+		statement.setString(2, name);
+		statement.setDouble(3, from.getLatitude());
+		statement.setDouble(4, from.getLongitude());
+		statement.setDouble(5, to.getLatitude());
+		statement.setDouble(6, to.getLongitude());
+		statement.setString(7, geometry);
 		
 		int count = statement.executeUpdate();
 		statement.close();
@@ -948,6 +948,27 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		statement.close();
 		
 	}
+
+	@Override
+	public boolean isEmptyMap() throws SQLException {
+		Statement statement = conn.createStatement();
+		ResultSet set = statement.executeQuery("SELECT Id From streetedges");
+		
+		return !set.next();
+	}
+
+	@Override
+	public List<Long> getUsersIDs() throws SQLException {
+		List<Long> users = new ArrayList();
+		Statement statement = conn.createStatement();
+		ResultSet set = statement.executeQuery("SELECT Id FROM users");
+		
+		while(set.next())
+			users.add(set.getLong(0));
+		
+		return users;
+	}
+
 
 	
 
