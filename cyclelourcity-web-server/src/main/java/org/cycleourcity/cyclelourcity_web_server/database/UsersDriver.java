@@ -31,7 +31,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean deleteUser(int userID) throws SQLException;
+	public boolean deleteUser(long userID) throws SQLException;
 	
 	/**
 	 * Removes a user from the users table.
@@ -57,7 +57,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean insertValidationRequest(int userID, String token) throws SQLException;
+	public boolean insertValidationRequest(long userID, String token) throws SQLException;
 
 	/**
 	 * Deletes an user's activation or recovery request entry.
@@ -80,7 +80,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean insertPasswordRecoveryRequest(int userID, String token) throws SQLException;
+	public boolean insertPasswordRecoveryRequest(long userID, String token) throws SQLException;
 	
 	/**
 	 * Fetches a user's UID.
@@ -111,7 +111,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public List<Integer> getUserActivationRequests(int userID) throws SQLException;
+	public List<Integer> getUserActivationRequests(long userID) throws SQLException;
 	
 	/**
 	 * Fetches a list of a user's pending recovery requests.
@@ -122,7 +122,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public List<Integer> getUserRecoveryRequests(int userID) throws SQLException;
+	public List<Integer> getUserRecoveryRequests(long userID) throws SQLException;
 	
 	/**
 	 * Fetches a list of all expired requests, either activation or
@@ -175,7 +175,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public String getUserSalt(int userID) throws SQLException;
+	public String getUserSalt(long userID) throws SQLException;
 	
 	/**
 	 * Fetches the password hash of the specified user.
@@ -187,7 +187,7 @@ public interface UsersDriver {
 	 * @throws SQLException
 	 * @throws UnknownUserIdentifierException 
 	 */
-	public String getUserPasswordHash(int userID) throws SQLException, UnknownUserIdentifierException;
+	public String getUserPasswordHash(long userID) throws SQLException, UnknownUserIdentifierException;
 	
 	
 	/**
@@ -199,7 +199,7 @@ public interface UsersDriver {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public boolean hasMatchingPassword(int userID, String password) throws SQLException;
+	public boolean hasMatchingPassword(long userID, String password) throws SQLException;
 	
 	/**
 	 * Checks if a given user account has not yet been activated.
@@ -210,7 +210,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean isPendingActivation(int userID) throws SQLException;
+	public boolean isPendingActivation(long userID) throws SQLException;
 	
 	/**
 	 * Checks if a given token has expired.
@@ -247,7 +247,7 @@ public interface UsersDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean updatePassword(int userID, String passwordHash, String salt) throws SQLException;
+	public boolean updatePassword(long userID, String passwordHash, String salt) throws SQLException;
 	
 	
 	public List<Long> getUsersIDs() throws SQLException;

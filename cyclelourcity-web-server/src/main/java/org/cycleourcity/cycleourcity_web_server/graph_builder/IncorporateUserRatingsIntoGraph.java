@@ -11,11 +11,9 @@ import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.AccountMan
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.AccountManager;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.StreetEdgeManagement;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.StreetEdgeManager;
-import org.cycleourcity.cyclelourcity_web_server.otp_routing.PlainStreetEdge;
 import org.cycleourcity.cycleourcity_web_server.graph_builder.Utils.Criterion;
 import org.cycleourcity.cycleourcity_web_server.graph_builder.exceptions.EmptyMapException;
 import org.opentripplanner.routing.edgetype.StreetEdge;
-import org.opentripplanner.routing.graph.Edge;
 import org.opentripplanner.routing.graph.Graph;
 
 /**
@@ -79,6 +77,7 @@ public class IncorporateUserRatingsIntoGraph {
 			_exportRatings = new ExportRatings();
 		} catch (EmptyMapException e) {
 			streetManager.populateStreetEdges(_graph);
+			
 			throw e; 
 		}
 		
@@ -444,7 +443,7 @@ public class IncorporateUserRatingsIntoGraph {
 		
 		try {
 			graphUpdater = new IncorporateUserRatingsIntoGraph(OLD_GRAPH);
-			graphUpdater.updateGraph(Criterion.safety);
+			//graphUpdater.updateGraph(Criterion.safety);
 			//graphUpdater.updateGraph(Criterion.elevation);
 
 			//graphUpdater.saveChanges(NEW_GRAPH);

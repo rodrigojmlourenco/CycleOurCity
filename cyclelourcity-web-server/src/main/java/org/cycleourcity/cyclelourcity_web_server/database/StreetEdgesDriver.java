@@ -24,7 +24,7 @@ public interface StreetEdgesDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean insertStreetEdge(Long id, String name, GeoLocation from, GeoLocation to, String geometry) throws SQLException;
+	public boolean insertStreetEdge(double id, String name, GeoLocation from, GeoLocation to, String geometry) throws SQLException;
 	
 	/**
 	 * Deletes a specific street edge entry.
@@ -35,7 +35,7 @@ public interface StreetEdgesDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean deleteStreetEdge(int streetEdgeID) throws SQLException;
+	public boolean deleteStreetEdge(double streetEdgeID) throws SQLException;
 	
 	/**
 	 * Fetches a specific street edge starting location.
@@ -49,7 +49,7 @@ public interface StreetEdgesDriver {
 	 * 
 	 * @see {@link GeoLocation}
 	 */
-	public GeoLocation getSteetEdgeFromLocation(int steetEdgeID) throws SQLException, StreetEdgeNotFoundException;
+	public GeoLocation getSteetEdgeFromLocation(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
 	
 	/**
 	 * Fetches a specific street edge finishing location.
@@ -63,7 +63,7 @@ public interface StreetEdgesDriver {
 	 * 
 	 * @see {@link GeoLocation}
 	 */
-	public GeoLocation getSteetEdgeToLocation(int steetEdgeID) throws SQLException, StreetEdgeNotFoundException;
+	public GeoLocation getSteetEdgeToLocation(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
 	
 	/**
 	 * Fetches a specific street edge name.
@@ -75,7 +75,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 * @throws StreetEdgeNotFoundException 
 	 */
-	public String getSteetEdgeName(int steetEdgeID) throws SQLException, StreetEdgeNotFoundException;
+	public String getSteetEdgeName(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
 	
 	/**
 	 * Fetches a specific street edge geometry.
@@ -87,7 +87,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 * @throws StreetEdgeNotFoundException 
 	 */
-	public String getSteetEdgeGeometry(int steetEdgeID) throws SQLException, StreetEdgeNotFoundException;
+	public String getSteetEdgeGeometry(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
 	
 	/**
 	 * Fetches a street edge as an object.
@@ -100,7 +100,7 @@ public interface StreetEdgesDriver {
 	 * 
 	 * @see {@link StreetEdge}
 	 */
-	public StreetEdge getStreetEdge(int streetEdgeID) throws SQLException;  
+	public StreetEdge getStreetEdge(double streetEdgeID) throws SQLException;  
 
 	/**
 	 * Classifies a street edge according to the specified criterion and
@@ -116,7 +116,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 * @throws UnsupportedCriterionException 
 	 */
-	public boolean classifyStreetEdge(Criteria criterion, int streetEdgeID, int factorID, int userID) throws SQLException, UnsupportedCriterionException;
+	public boolean classifyStreetEdge(Criteria criterion, double streetEdgeID, int factorID, long userID) throws SQLException, UnsupportedCriterionException;
 	
 	/**
 	 * Fetches all the classification factors identifiers with regard
@@ -129,7 +129,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 * @throws UnsupportedCriterionException 
 	 */
-	public List<Integer> getStreetEdgeClassifications(Criteria criterion, int streetEdgeID) throws SQLException, UnsupportedCriterionException;
+	public List<Integer> getStreetEdgeClassifications(Criteria criterion, double streetEdgeID) throws SQLException, UnsupportedCriterionException;
 	
 	/**
 	 * Checks if the street edges tables, which characterizes the a city's map,
@@ -151,7 +151,7 @@ public interface StreetEdgesDriver {
 	 * @return List of all street edges classified by the user.
 	 * @throws SQLException
 	 */
-	public List<Integer> getUserClassifiedStreetEdges(Criteria criterion, int userID) throws SQLException;
+	public List<Integer> getUserClassifiedStreetEdges(Criteria criterion, long userID) throws SQLException;
 	
 	
 	/**

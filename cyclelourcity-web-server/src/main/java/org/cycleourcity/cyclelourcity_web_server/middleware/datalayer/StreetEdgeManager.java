@@ -13,6 +13,7 @@ import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedTripEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.Trip;
 import org.cycleourcity.cyclelourcity_web_server.datatype.UserRating;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
 import org.cycleourcity.cyclelourcity_web_server.utils.CriteriaUtils.Criteria;
 import org.cycleourcity.cyclelourcity_web_server.utils.exceptions.UnsupportedCriterionException;
@@ -128,7 +129,7 @@ public class StreetEdgeManager implements StreetEdgeManagement{
 	}
 	
 	@Override
-	public boolean classifyStreetEdge(int tripID, int streetEdgeID, int safety, int elevation, int pavement, int rails, int userID, boolean last) 
+	public boolean classifyStreetEdge(long tripID, long streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) 
 			throws UnknowStreetEdgeException {
 
 		try {
@@ -212,7 +213,7 @@ public class StreetEdgeManager implements StreetEdgeManagement{
 	public void populateStreetEdges(Graph graph) {
 		
 		int i=0;
-		long id;
+		double id;
 		boolean error = false;;
 		String name, geometry;
 		GeoLocation from, to;
@@ -318,5 +319,31 @@ public class StreetEdgeManager implements StreetEdgeManagement{
 	public boolean clearAndUpdateConsolidatedRailsRatings(HashMap<Integer, Integer> ratings) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void saveTrip(long userID, String tripName, List<SimplifiedTripEdge> streetEdges) 
+			throws UnableToPerformOperation{
+		
+		int tripId;
+		List<Integer> userTrips;
+		
+		try {
+			tripsDriver.insertTrip(userID, tripName);
+
+			userTrips = tripsDriver.getUsersTrips(userID);
+			tripId = userTrips.get(userTrips.size()-1);
+			
+			for(SimplifiedTripEdge se : streetEdges)
+				tripsDriver.insertTripStreetEdge(tripId, se.getStreetEdgeID(), se.isBicycleMode());
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new UnableToPerformOperation(e.getMessage());
+		} catch (NullPointerException e){
+			e.printStackTrace();
+			throw new UnableToPerformOperation(e.getMessage());
+		}
 	}
 }

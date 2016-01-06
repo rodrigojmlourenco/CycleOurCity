@@ -7,8 +7,6 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
 
-import org.apache.commons.codec.binary.Base64;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
 import org.joda.time.DateTime;
 
 public class SecurityUtils {

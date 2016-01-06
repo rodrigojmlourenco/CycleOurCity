@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.cycleourcity.cyclelourcity_web_server.database.exception.StreetEdgeNotFoundException;
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
+import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedTripEdge;
 import org.cycleourcity.cyclelourcity_web_server.datatype.Trip;
 import org.cycleourcity.cyclelourcity_web_server.datatype.UserRating;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
 import org.opentripplanner.routing.graph.Graph;
 
@@ -63,6 +65,14 @@ public interface StreetEdgeManagement {
 	public List<Integer> getUserTrips(int userID);
 	
 	/**
+	 * TODO: comment
+	 * @param userID
+	 * @param tripName
+	 * @param streetEdges
+	 */
+	public void saveTrip(long userID, String tripName, List<SimplifiedTripEdge> streetEdges) throws UnableToPerformOperation;
+	
+	/**
 	 * Fetches all geometries from street edges, which are classified
 	 * in terms of their elevation.
 	 * 
@@ -91,7 +101,7 @@ public interface StreetEdgeManagement {
 	 * 
 	 * @throws UnknowStreetEdgeException 
 	 */
-	public boolean classifyStreetEdge(int tripID, int streetEdgeID, int safety, int elevation, int pavement, int rails, int userID, boolean last) throws UnknowStreetEdgeException;
+	public boolean classifyStreetEdge(long tripID, long streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) throws UnknowStreetEdgeException;
 	
 	//BACK-END
 	public boolean isEmptyMap();

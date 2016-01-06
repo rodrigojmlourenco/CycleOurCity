@@ -1,14 +1,19 @@
 package org.cycleourcity.cyclelourcity_web_server.middleware;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
+import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedTripEdge;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.AccountManagementLayer;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.AccountManager;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.StreetEdgeManagement;
 import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.StreetEdgeManager;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
+import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class CycleOurCityManager {
@@ -80,7 +85,88 @@ public class CycleOurCityManager {
 	 * These functions may only be invoked by an			* 
 	 * authenticated user									*
 	 ********************************************************
+	 * a) Street Edge Classification						*
+	 * b) Trip Management									*
+	 ********************************************************
 	 */
+	
+	//@InsertUserFeedback.php
+	public JsonObject classifyStreetEdge(JsonObject request, boolean last){
+		
+		JsonObject response = new JsonObject();
+		
+		long userId 	= request.get("userId").getAsLong();
+		long tripId 	= request.get("tripId").getAsLong();
+		long streetId 	= request.get("streetEdgeId").getAsLong();
+		
+		int elevation 	= request.get("elevation").getAsInt();
+		int safety 		= request.get("safety").getAsInt();
+		int rails 		= request.get("rails").getAsInt();
+		int pavement 	= request.get("pavement").getAsInt();
+		
+		try {
+			
+			STREET_MANAGER.classifyStreetEdge(
+					tripId,
+					streetId,
+					safety,
+					elevation, pavement, rails,
+					userId, last);
+			
+			response.addProperty("success", true);
+			
+			
+		} catch (UnknowStreetEdgeException e) {
+			e.printStackTrace();
+			
+			response.addProperty("success", false);
+			response.addProperty("error", e.getMessage());
+		}
+		
+		return response;
+	}
+	
+	//@SaveTrip.php
+	public JsonObject saveTrip(JsonObject request){
+		
+		JsonObject response = new JsonObject();
+		long userID = request.get("user").getAsInt();
+		String name = request.get("tripName").getAsString();
+		JsonArray streetEdges = request.getAsJsonArray("tripStreetEdges");
+		
+		List<SimplifiedTripEdge> edges = new ArrayList<SimplifiedTripEdge>();
+		
+		JsonObject aux;
+		SimplifiedTripEdge tripEdge;
+		
+		for(JsonElement e : streetEdges){
+			aux = (JsonObject) e;
+			
+			tripEdge = new SimplifiedTripEdge(
+					aux.get("streetEdgeId").getAsLong(),
+					aux.get("geometry").getAsString(),
+					aux.get("isBicycle").getAsBoolean());
+			
+			edges.add(tripEdge);
+		}
+			
+		
+		try {
+			STREET_MANAGER.saveTrip(userID, name, edges);
+		} catch (UnableToPerformOperation e1) {
+			e1.printStackTrace();
+			response.addProperty("success", false);
+			response.addProperty("error", e1.getMessage());
+		}
+		
+		return null;
+	}
+	
+	//@NEW
+	public JsonObject planTrip(JsonObject request){
+		
+		return null;
+	}
 	
 	/*
 	 ********************************************************
@@ -90,6 +176,7 @@ public class CycleOurCityManager {
 	 * deletion of new users.
 	 ********************************************************
 	 */
+	
 	
 	/*
 	 ********************************************************

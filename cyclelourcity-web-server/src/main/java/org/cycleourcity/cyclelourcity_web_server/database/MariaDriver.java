@@ -76,12 +76,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		return count > 0;
 	}
 	
-	public boolean deleteUser(int userID) throws SQLException{
+	public boolean deleteUser(long userID) throws SQLException{
 		
 		PreparedStatement statement = 
 				conn.prepareStatement("DELETE FROM users WHERE Id=?");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		int count = statement.executeUpdate();
 		statement.close();
 		
@@ -105,7 +105,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		return count > 0;
 	}
 	
-	private boolean insertIntoUsersEmails(int userID, String token, boolean isRecovery)
+	private boolean insertIntoUsersEmails(long userID, String token, boolean isRecovery)
 		throws SQLException {
 		
 		PreparedStatement statement =
@@ -113,7 +113,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"INSERT INTO users_emails (IdUser, RecoveryPassword, Token, ExpirationDate) "
 						+ "VALUES (?,?,?,?)");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		if(isRecovery) statement.setInt(2, 1);
 		else statement.setInt(2, 0);
 		statement.setString(3, token);
@@ -125,7 +125,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		return count > 0;
 	}
 	
-	public boolean insertValidationRequest(int userID, String token)
+	public boolean insertValidationRequest(long userID, String token)
 		throws SQLException{
 		
 		return insertIntoUsersEmails(userID, token, false);
@@ -142,14 +142,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		return count > 0;
 	}
 	
-	public boolean insertPasswordRecoveryRequest(int userID, String token)
+	public boolean insertPasswordRecoveryRequest(long userID, String token)
 		throws SQLException{
 		
 		return insertIntoUsersEmails(userID, token, true);
 	}
 	
 	@Override
-	public boolean updatePassword(int userID, String passwordHash, String salt) throws SQLException {
+	public boolean updatePassword(long userID, String passwordHash, String salt) throws SQLException {
 		
 		PreparedStatement statement = 
 				conn.prepareStatement(
@@ -157,7 +157,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		
 		statement.setString(1, passwordHash);
 		statement.setString(2, salt);
-		statement.setInt(3, userID);
+		statement.setLong(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
@@ -196,7 +196,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 			return -1;
 	}
 	
-	public List<Integer> getUserActivationRequests(int userID) throws SQLException{
+	public List<Integer> getUserActivationRequests(long userID) throws SQLException{
 		
 		PreparedStatement statement = 
 				conn.prepareStatement(
@@ -204,7 +204,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM users_emails "
 						+ "WHERE UserId=? AND PasswordRecovery = '0'");
 		
-		statement.setInt(0, userID);
+		statement.setLong(0, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -216,7 +216,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 	
 
-	public List<Integer> getUserRecoveryRequests(int userID) throws SQLException{
+	public List<Integer> getUserRecoveryRequests(long userID) throws SQLException{
 		
 		PreparedStatement statement = 
 				conn.prepareStatement(
@@ -224,7 +224,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM users_emails "
 						+ "WHERE UserId=? AND PasswordRecovery = '1'");
 		
-		statement.setInt(0, userID);
+		statement.setLong(0, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -293,14 +293,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 	
 	@Override
-	public String getUserPasswordHash(int userID) throws SQLException, UnknownUserIdentifierException {
+	public String getUserPasswordHash(long userID) throws SQLException, UnknownUserIdentifierException {
 		PreparedStatement statement = 
 				conn.prepareStatement(
 						"SELECT Password "
 						+ "FROM users "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -337,13 +337,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 	
 	@Override
-	public boolean isPendingActivation(int userID) throws SQLException{
+	public boolean isPendingActivation(long userID) throws SQLException{
 
 		PreparedStatement statement = 
 				conn.prepareStatement(
 						"SELECT IdUser FROM users_emails WHERE IdUser = ? AND RecoveryPassword = '0'");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -372,12 +372,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	
 	
 	@Override
-	public String getUserSalt(int userID) throws SQLException {
+	public String getUserSalt(long userID) throws SQLException {
 		
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT salt FROM users WHERE Id = ?");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -389,14 +389,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 
 	@Override
-	public boolean hasMatchingPassword(int userID, String password) throws SQLException {
+	public boolean hasMatchingPassword(long userID, String password) throws SQLException {
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"SELECT Id "
 						+ "FROM users "
 						+ "WHERE Id = ? AND Password = ?");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		statement.setString(2, password);
 		
 		ResultSet set = statement.executeQuery();
@@ -464,14 +464,14 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	 * D - Trips															*
 	 ************************************************************************/
 	@Override
-	public boolean insertTrip(int userID, String name) throws SQLException {
+	public boolean insertTrip(long userID, String name) throws SQLException {
 		
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"INSERT INTO trips (IdUser, Name) "
 						+ "VALUES (?,?)");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		statement.setString(2, name);
 		
 		int count = statement.executeUpdate();
@@ -481,15 +481,15 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public boolean insertTripStreetEdge(int tripID, int streetEdgeID, boolean bicycle) throws SQLException {
+	public boolean insertTripStreetEdge(long tripID, double streetEdgeID, boolean bicycle) throws SQLException {
 
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"INSERT INTO trips_streetedges (IdTrip, IdStreetEdge, BicycleMode) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(1, tripID);
-		statement.setInt(2, streetEdgeID);
+		statement.setLong(1, tripID);
+		statement.setDouble(2, streetEdgeID);
 		if(bicycle) statement.setInt(3, 1);
 		else if(bicycle) statement.setInt(3, 0);
 		
@@ -500,12 +500,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public boolean deleteTrip(int tripID) throws SQLException {
+	public boolean deleteTrip(long tripID) throws SQLException {
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"DELETE FROM trips WHERE Id=?");
 		
-		statement.setInt(1, tripID);
+		statement.setLong(1, tripID);
 		int count = statement.executeUpdate();
 		statement.close();
 		
@@ -513,12 +513,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 	
 	@Override
-	public boolean deleteTripStreetEdges(int tripID) throws SQLException {
+	public boolean deleteTripStreetEdges(long tripID) throws SQLException {
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"DELETE FROM trips_streetedges WHERE IdTrip=?");
 		
-		statement.setInt(1, tripID);
+		statement.setLong(1, tripID);
 		int count = statement.executeUpdate();
 		statement.close();
 		
@@ -526,7 +526,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public boolean deleteTripStreetEdge(int tripID, int streetEdgeID) 
+	public boolean deleteTripStreetEdge(long tripID, double streetEdgeID) 
 			throws SQLException {
 
 		PreparedStatement statement =
@@ -534,8 +534,8 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"DELETE FROM trips_streetedges "
 						+ "WHERE IdTrip = ? AND IdStreetEdge = ?");
 		
-		statement.setInt(1, tripID);
-		statement.setInt(2, streetEdgeID);
+		statement.setLong(1, tripID);
+		statement.setDouble(2, streetEdgeID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
@@ -544,7 +544,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public List<Integer> getUsersTrips(int userID) throws SQLException {
+	public List<Integer> getUsersTrips(long userID) throws SQLException {
 		
 		List<Integer> trips = new ArrayList<Integer>();
 		
@@ -552,7 +552,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 				conn.prepareStatement(
 						"SELECT Id FROM trips WHERE IdUser=?");
 		
-		statement.setInt(1, userID);
+		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -563,7 +563,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public List<Integer> getTripStreetEdgesIDs(int tripID) throws SQLException {
+	public List<Integer> getTripStreetEdgesIDs(long tripID) throws SQLException {
 		
 		List<Integer> streetEdges = new ArrayList<>();
 		
@@ -573,7 +573,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM trips_streetedges "
 						+ "WHERE IdTrip = ?");
 		
-		statement.setInt(1, tripID);
+		statement.setLong(1, tripID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -584,7 +584,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 	
 	@Override
-	public List<SimplifiedTripEdge> getTripStreetEdges(int tripID)
+	public List<SimplifiedTripEdge> getTripStreetEdges(long tripID)
 			throws SQLException {
 		
 		List<SimplifiedTripEdge> streetEdges = new ArrayList<>();
@@ -596,14 +596,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "ON t1.IdStreetEdge = t2.Id "
 						+ "WHERE t1.IdTrip = ?");
 		
-		statement.setInt(1, tripID);
+		statement.setLong(1, tripID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
-		
 		boolean bicycle;
 		String geometry;
-		int streetEdgeID;
+		double streetEdgeID;
 		while(set.next()){
 			
 			streetEdgeID = set.getInt(1);
@@ -618,7 +617,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 	
 	@Override
-	public boolean tripContainStreetEdge(int tripID, int streetEdgeID) 
+	public boolean tripContainStreetEdge(long tripID, double streetEdgeID) 
 			throws SQLException {
 		
 		PreparedStatement statement = 
@@ -626,8 +625,8 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"SELECT * FROM trips_streetedges "
 						+ "WHERE IdTrip = ? AND IdStreetEdge = ?");
 		
-		statement.setInt(1, tripID);
-		statement.setInt(2, streetEdgeID);
+		statement.setLong(1, tripID);
+		statement.setDouble(2, streetEdgeID);
 		
 		ResultSet set = statement.executeQuery();
 		statement.close();
@@ -638,7 +637,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	/////////////////////////////////////////////////////////
 
 	@Override
-	public boolean insertStreetEdge(Long id, String name, GeoLocation from, GeoLocation to, String geometry)
+	public boolean insertStreetEdge(double id, String name, GeoLocation from, GeoLocation to, String geometry)
 			throws SQLException {
 		
 		PreparedStatement statement =
@@ -646,7 +645,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"INSERT INTO streetedges (Id, Name, FromVertexLatitude, FromVertexLongitude, ToVertexLatitude, ToVertexLongitude, Geometry) "
 						+ "VALUES (?,?,?,?,?,?,?)");
 		
-		statement.setLong(1, id);
+		statement.setDouble(1, id);
 		statement.setString(2, name);
 		statement.setDouble(3, from.getLatitude());
 		statement.setDouble(4, from.getLongitude());
@@ -661,12 +660,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public boolean deleteStreetEdge(int streetEdgeID) throws SQLException {
+	public boolean deleteStreetEdge(double streetEdgeID) throws SQLException {
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"DELETE FROM streetedges WHERE Id=?");
 		
-		statement.setInt(1, streetEdgeID);
+		statement.setDouble(1, streetEdgeID);
 		int count = statement.executeUpdate();
 		statement.close();
 		
@@ -674,7 +673,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public GeoLocation getSteetEdgeFromLocation(int steetEdgeID) 
+	public GeoLocation getSteetEdgeFromLocation(double streetEdgeID) 
 			throws SQLException, StreetEdgeNotFoundException {
 		
 		PreparedStatement statement = 
@@ -683,7 +682,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(1, steetEdgeID);
+		statement.setDouble(1, streetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -694,7 +693,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public GeoLocation getSteetEdgeToLocation(int steetEdgeID) 
+	public GeoLocation getSteetEdgeToLocation(double streetEdgeID) 
 			throws SQLException, StreetEdgeNotFoundException {
 		
 		PreparedStatement statement = 
@@ -703,7 +702,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(1, steetEdgeID);
+		statement.setDouble(1, streetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -714,7 +713,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public String getSteetEdgeName(int steetEdgeID) 
+	public String getSteetEdgeName(double streetEdgeID) 
 			throws SQLException, StreetEdgeNotFoundException {
 		
 		PreparedStatement statement = 
@@ -723,7 +722,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(1, steetEdgeID);
+		statement.setDouble(1, streetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -734,7 +733,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public String getSteetEdgeGeometry(int steetEdgeID) 
+	public String getSteetEdgeGeometry(double streetEdgeID) 
 			throws SQLException, StreetEdgeNotFoundException {
 		
 		PreparedStatement statement = 
@@ -743,7 +742,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						+ "FROM streetedges "
 						+ "WHERE Id = ?");
 		
-		statement.setInt(1, steetEdgeID);
+		statement.setDouble(1, streetEdgeID);
 		ResultSet set = statement.executeQuery();
 		statement.close();
 		
@@ -754,13 +753,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public StreetEdge getStreetEdge(int streetEdgeID) throws SQLException {
+	public StreetEdge getStreetEdge(double streetEdgeID) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	
-	private boolean classifySteetEdgeElevation(int streetEdge, int factorID, int userID) 
+	private boolean classifySteetEdgeElevation(double streetEdgeID, int factorID, long userID) 
 			throws SQLException{
 		
 		PreparedStatement statement = 
@@ -768,9 +767,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"INSERT INTO streetedges_elevation (IdStreetEdge, IdElevation, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(1, streetEdge);
+		statement.setDouble(1, streetEdgeID);
 		statement.setInt(2, factorID);
-		statement.setInt(3, userID);
+		statement.setLong(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
@@ -779,7 +778,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		
 	}
 	
-	private boolean classifySteetEdgeSafety(int streetEdge, int factorID, int userID) 
+	private boolean classifySteetEdgeSafety(double streetEdgeID, int factorID, long userID) 
 			throws SQLException{
 		
 		PreparedStatement statement = 
@@ -787,9 +786,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"INSERT INTO streetedges_safety (IdStreetEdge, IdSafety, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(1, streetEdge);
+		statement.setDouble(1, streetEdgeID);
 		statement.setInt(2, factorID);
-		statement.setInt(3, userID);
+		statement.setLong(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
@@ -798,7 +797,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		
 	}
 	
-	private boolean classifySteetEdgePavement(int streetEdge, int factorID, int userID) 
+	private boolean classifySteetEdgePavement(double streetEdgeID, int factorID, long userID) 
 			throws SQLException{
 		
 		PreparedStatement statement = 
@@ -806,18 +805,17 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"INSERT INTO streetedges_pavement (IdStreetEdge, IdPavement, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(1, streetEdge);
+		statement.setDouble(1, streetEdgeID);
 		statement.setInt(2, factorID);
-		statement.setInt(3, userID);
+		statement.setLong(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
 		
 		return count > 0;
-		
 	}
 	
-	private boolean classifySteetEdgeRails(int streetEdge, int factorID, int userID) 
+	private boolean classifySteetEdgeRails(double streetEdgeID, int factorID, long userID) 
 			throws SQLException{
 		
 		PreparedStatement statement = 
@@ -825,19 +823,18 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 						"INSERT INTO streetedges_rails (IdStreetEdge, IdRails, IdUser) "
 						+ "VALUES (?,?,?)");
 		
-		statement.setInt(1, streetEdge);
+		statement.setDouble(1, streetEdgeID);
 		statement.setInt(2, factorID);
-		statement.setInt(3, userID);
+		statement.setLong(3, userID);
 		
 		int count = statement.executeUpdate();
 		statement.close();
 		
 		return count > 0;
-		
 	}
 	
 	@Override
-	public boolean classifyStreetEdge(Criteria criterion, int streetEdgeID, int factorID, int userID)
+	public boolean classifyStreetEdge(Criteria criterion, double streetEdgeID, int factorID, long userID)
 			throws SQLException, UnsupportedCriterionException {
 		
 		switch (criterion) {
@@ -855,7 +852,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public List<Integer> getStreetEdgeClassifications(Criteria criterion, int streetEdgeID) throws SQLException, UnsupportedCriterionException {
+	public List<Integer> getStreetEdgeClassifications(Criteria criterion, double streetEdgeID) throws SQLException, UnsupportedCriterionException {
 		
 		List<Integer> factors = new ArrayList<>();
 		String table = CriteriaUtils.getCriterionClassificationTable(criterion);
@@ -864,7 +861,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 				conn.prepareStatement(
 						"SELECT * FROM "+table+" WHERE IdStreetEdge = ?");
 		
-		statement.setInt(1, streetEdgeID);
+		statement.setDouble(1, streetEdgeID);
 		ResultSet set = statement.executeQuery();
 		
 		while(set.next())
@@ -874,7 +871,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	}
 
 	@Override
-	public List<Integer> getUserClassifiedStreetEdges(Criteria criterion, int userID) throws SQLException {
+	public List<Integer> getUserClassifiedStreetEdges(Criteria criterion, long userID) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -959,7 +956,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 	@Override
 	public List<Long> getUsersIDs() throws SQLException {
-		List<Long> users = new ArrayList();
+		List<Long> users = new ArrayList<Long>();
 		Statement statement = conn.createStatement();
 		ResultSet set = statement.executeQuery("SELECT Id FROM users");
 		
@@ -967,13 +964,6 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 			users.add(set.getLong(0));
 		
 		return users;
-	}
-
-
-	
-
-
-
-	
+	}	
 }
 

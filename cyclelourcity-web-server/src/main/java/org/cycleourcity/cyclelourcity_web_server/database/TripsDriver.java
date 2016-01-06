@@ -16,7 +16,7 @@ public interface TripsDriver {
 	 * @return True if the operation was successful, false otherwise.
 	 * @throws SQLException 
 	 */
-	public boolean insertTrip(int userID, String name) throws SQLException;
+	public boolean insertTrip(long userID, String name) throws SQLException;
 	
 	/**
 	 * Creates a new trip's street edge.
@@ -28,7 +28,7 @@ public interface TripsDriver {
 	 * @return True if the operation was successful, false otherwise.
 	 * @throws SQLException 
 	 */
-	public boolean insertTripStreetEdge(int tripID, int streetEdgeID, boolean bicycle) throws SQLException;
+	public boolean insertTripStreetEdge(long tripID, double streetEdgeID, boolean bicycle) throws SQLException;
 	
 	
 	/**
@@ -39,7 +39,7 @@ public interface TripsDriver {
 	 * @return True if the operation was successful, false otherwise.
 	 * @throws SQLException 
 	 */
-	public boolean deleteTrip(int tripID) throws SQLException;
+	public boolean deleteTrip(long tripID) throws SQLException;
 	
 	/**
 	 * Deletes all street edges associated with a specific trip.
@@ -50,7 +50,7 @@ public interface TripsDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean deleteTripStreetEdges(int tripID) throws SQLException;
+	public boolean deleteTripStreetEdges(long tripID) throws SQLException;
 	
 	/**
 	 * Deletes a street edge associated with a specific trip.
@@ -61,7 +61,7 @@ public interface TripsDriver {
 	 * @return True if the operation was successful, false otherwise.
 	 * @throws SQLException 
 	 */
-	public boolean deleteTripStreetEdge(int tripID, int streetEdgeID) throws SQLException;
+	public boolean deleteTripStreetEdge(long tripID, double streetEdgeID) throws SQLException;
 
 	/**
 	 * Fetches a list of a specific user's trips.
@@ -71,7 +71,7 @@ public interface TripsDriver {
 	 * @return List containing the identifiers of the user's trips.
 	 * @throws SQLException 
 	 */
-	public List<Integer> getUsersTrips(int userID) throws SQLException;
+	public List<Integer> getUsersTrips(long userID) throws SQLException;
 	
 	/**
 	 * Fetches a list of all the street edges that comprise a specific trip.
@@ -81,7 +81,7 @@ public interface TripsDriver {
 	 * @return List containing the street edges identifiers that comprise a specific trip.
 	 * @throws SQLException 
 	 */
-	public List<Integer> getTripStreetEdgesIDs(int tripID) throws SQLException;
+	public List<Integer> getTripStreetEdgesIDs(long tripID) throws SQLException;
 	
 	/**
 	 * Fetches a list of all the street edges that comprise a specific trip.
@@ -93,7 +93,7 @@ public interface TripsDriver {
 	 * 
 	 * @see {@link SimplifiedTripEdge}
 	 */
-	public List<SimplifiedTripEdge> getTripStreetEdges(int tripID) throws SQLException;
+	public List<SimplifiedTripEdge> getTripStreetEdges(long tripID) throws SQLException;
 	
 	/**
 	 * Checks if the specified trip contain a specific street edge.
@@ -105,5 +105,5 @@ public interface TripsDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean tripContainStreetEdge(int tripID, int streetEdgeID) throws SQLException;
+	public boolean tripContainStreetEdge(long tripID, double streetEdgeID) throws SQLException;
 }
