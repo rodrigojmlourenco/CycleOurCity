@@ -1,21 +1,21 @@
 package org.cycleourcity.cyclelourcity_web_server;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-
-import org.cycleourcity.cyclelourcity_web_server.database.MariaDriver;
-import org.cycleourcity.cyclelourcity_web_server.datatype.CriteriaFactor;
-import org.cycleourcity.cyclelourcity_web_server.utils.CriteriaUtils.Criteria;
-import org.glassfish.grizzly.http.server.HttpServer;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.WebTarget;
+
+import org.cycleourcity.driver.database.impl.MariaDriver;
+import org.cycleourcity.driver.database.structures.CriteriaFactor;
+import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class MyResourceTest {
 

@@ -3,14 +3,14 @@ package org.cycleourcity.cyclelourcity_web_server.middleware;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedStreetEdge;
-import org.cycleourcity.cyclelourcity_web_server.datatype.SimplifiedTripEdge;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.AccountManagementLayer;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.AccountManager;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.StreetEdgeManagement;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.StreetEdgeManager;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnableToPerformOperation;
-import org.cycleourcity.cyclelourcity_web_server.middleware.datalayer.exceptions.UnknowStreetEdgeException;
+import org.cycleourcity.driver.AccountManagementDriver;
+import org.cycleourcity.driver.StreetEdgeManagementDriver;
+import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
+import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
+import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
+import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
+import org.cycleourcity.driver.impl.AccountManagementDriverImpl;
+import org.cycleourcity.driver.impl.StreetEdgeManagementDriverImpl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -18,13 +18,14 @@ import com.google.gson.JsonObject;
 
 public class CycleOurCityManager {
 
-	private final StreetEdgeManagement 		STREET_MANAGER;
-	private final AccountManagementLayer 	ACCOUNT_MANAGER;
+	private final StreetEdgeManagementDriver 		STREET_MANAGER;
+	private final AccountManagementDriver	 	ACCOUNT_MANAGER;
 	
 	
 	private CycleOurCityManager(){
-		this.ACCOUNT_MANAGER= AccountManager.getManager();
-		this.STREET_MANAGER	= StreetEdgeManager.getManager();
+		this.ACCOUNT_MANAGER= AccountManagementDriverImpl.getManager();
+		this.STREET_MANAGER	= StreetEdgeManagementDriverImpl.getManager();
+		
 	}
 	
 	/*
