@@ -63,7 +63,7 @@ if not os.path.exists(basedir+'/graph'):
 print "\n OSM information fetched... Generating graph at "+basedir
 
 #command = "java -Xmx2G -jar ../resources/otp-0.19.0-shaded.jar --basePath ../resources --build ../resources/city"
-command = "java -Xmx2G -jar ../resources/otp-0.19.0-shaded.jar --basePath "+basedir+" --build "+basedir
+command = "java -Xmx2G -jar ../resources/otp-0.20.0-CYCLEOURCITY.jar --basePath "+basedir+" --build "+basedir
 os.system(command)
 
 os.rename(basedir+'/Graph.obj', basedir+'/graph/old/Graph.obj')

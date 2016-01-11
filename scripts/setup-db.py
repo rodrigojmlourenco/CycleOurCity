@@ -153,12 +153,14 @@ streetedge_safety += "RateAt timestamp DEFAULT CURRENT_TIMESTAMP)"
 
 streetedge_consolidatedelevation  = "CREATE TABLE IF NOT EXISTS streetedge_consolidatedelevation ("
 streetedge_consolidatedelevation += "Id Double UNSIGNED NOT NULL PRIMARY KEY, "
+streetedge_consolidatedelevation += "FOREIGN KEY (Id) REFERENCES streetedges(Id) ON DELETE CASCADE, "
 streetedge_consolidatedelevation += "IdElevation INT(11) UNSIGNED NOT NULL, "
 streetedge_consolidatedelevation += "FOREIGN KEY (IdElevation) REFERENCES elevation(Id) ON DELETE CASCADE, "
 streetedge_consolidatedelevation += "Rate_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
 
 streetedge_consolidatedsafety  = "CREATE TABLE IF NOT EXISTS streetedge_consolidatedsafety ("
 streetedge_consolidatedsafety += "Id Double UNSIGNED NOT NULL PRIMARY KEY, "
+streetedge_consolidatedsafety += "FOREIGN KEY (Id) REFERENCES streetedges(Id) ON DELETE CASCADE, "
 streetedge_consolidatedsafety += "IdSafety INT(11) UNSIGNED NOT NULL, "
 streetedge_consolidatedsafety += "FOREIGN KEY (IdSafety) REFERENCES safety(Id) ON DELETE CASCADE, "
 streetedge_consolidatedsafety += "Rate_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
@@ -185,6 +187,8 @@ cursor.execute(streetedge_pavement)
 cursor.execute(streetedge_elevation)
 cursor.execute(trips)
 cursor.execute(trips_streetedges)
+cursor.execute(streetedge_consolidatedelevation)
+cursor.execute(streetedge_consolidatedsafety)
 
 mariadb_connection.commit()
 mariadb_connection.close()
