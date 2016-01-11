@@ -2,13 +2,6 @@ package org.cycleourcity.otp.utils;
 
 public interface Utils {
 	
-	public static enum Criterion {
-		safety,
-		elevation,
-		pavement,
-		rails
-	}
-	
 	public static interface DatabaseFields{
 		
 		public static final String

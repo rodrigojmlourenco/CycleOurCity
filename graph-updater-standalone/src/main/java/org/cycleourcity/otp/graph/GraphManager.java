@@ -3,9 +3,10 @@ package org.cycleourcity.otp.graph;
 import java.io.File;
 import java.io.IOException;
 
+import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
 import org.cycleourcity.otp.coc.CoCtoOTPUpdater;
 import org.cycleourcity.otp.graph.exceptions.UnableToSerializeGraph;
-import org.cycleourcity.otp.utils.Utils.Criterion;
+import org.cycleourcity.otp.planner.exceptions.UnsupportedCriterionException;
 import org.opentripplanner.graph_builder.GraphBuilder;
 import org.opentripplanner.routing.graph.Graph;
 
@@ -46,9 +47,15 @@ public class GraphManager
 		
 		// 3 - If there are CoC classification add them to the graph
 		merger = new CoCtoOTPUpdater(graph);
-		merger.updateGraph(Criterion.safety);
-		merger.updateGraph(Criterion.elevation);
-		//merger.saveChanges(NEW_GRAPH);
+		try {
+			merger.updateGraph(Criteria.safety);
+			merger.updateGraph(Criteria.elevation);
+			merger.saveChanges(NEW_GRAPH);
+		} catch (UnsupportedCriterionException e) {
+			throw new UnableToSerializeGraph(e.getMessage());
+		}
+		
+		
 		
 	}
 	

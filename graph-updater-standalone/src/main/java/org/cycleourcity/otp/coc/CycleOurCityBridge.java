@@ -1,7 +1,5 @@
 package org.cycleourcity.otp.coc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +11,6 @@ import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.UserRating;
 import org.cycleourcity.driver.impl.StreetEdgeManagementDriverImpl;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
-import org.cycleourcity.otp.utils.Utils.Criterion;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.graph.Graph;
 

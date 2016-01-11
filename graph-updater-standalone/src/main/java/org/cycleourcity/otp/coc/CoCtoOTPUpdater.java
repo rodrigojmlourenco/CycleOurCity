@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.cycleourcity.driver.AccountManagementDriver;
 import org.cycleourcity.driver.database.structures.StreetEdgeStatistics;
@@ -17,7 +16,6 @@ import org.cycleourcity.otp.data.UserStats;
 import org.cycleourcity.otp.planner.exceptions.UnsupportedCriterionException;
 import org.cycleourcity.otp.utils.SafetyUtils;
 import org.cycleourcity.otp.utils.SlopeUtils;
-import org.cycleourcity.otp.utils.Utils.Criterion;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.graph.Graph;
 
