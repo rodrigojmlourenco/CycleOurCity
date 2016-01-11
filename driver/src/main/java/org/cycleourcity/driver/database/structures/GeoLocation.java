@@ -14,4 +14,9 @@ public class GeoLocation {
 	
 	public double getLongitude(){ return this.longitude; }
 
+	@Override
+	public String toString() {
+		return ""+latitude+","+longitude;
+	}
+	
 }

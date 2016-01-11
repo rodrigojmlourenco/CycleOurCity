@@ -6,6 +6,7 @@ import java.util.List;
 import org.cycleourcity.driver.database.structures.CustomStreetEdge;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
+import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.Trip;
 import org.cycleourcity.driver.database.structures.UserRating;
 import org.cycleourcity.driver.exceptions.StreetEdgeNotFoundException;
@@ -14,7 +15,7 @@ import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
 
 public interface StreetEdgeManagementDriver {
 
-	
+
 	//@StreetEdgeRating.php
 	/**
 	 * Fetches a list of all street edges classified in terms of elevation.
@@ -24,8 +25,8 @@ public interface StreetEdgeManagementDriver {
 	 * @see SimplifiedElevationEdge
 	 */
 	public List<SimplifiedStreetEdge> getStreetEdgesWithElevation();
-	
-	
+
+
 	/**
 	 * Fetches a list of all street edges classified in terms of safety.
 	 * 
@@ -34,8 +35,8 @@ public interface StreetEdgeManagementDriver {
 	 * @see SimplifiedSafetyEdge
 	 */
 	public List<SimplifiedStreetEdge> getStreetEdgesWithSafety();
-	
-	
+
+
 	//@Usertrips.php
 	/**
 	 * Fetches all the street edges from a specific trip.
@@ -50,7 +51,7 @@ public interface StreetEdgeManagementDriver {
 	 * @see Trip
 	 */
 	public Trip getTrip(int tripID) throws StreetEdgeNotFoundException;
-	
+
 	/**
 	 * Fetches all the trips belonging to a specific user.
 	 * <br>
@@ -63,7 +64,7 @@ public interface StreetEdgeManagementDriver {
 	 * @return List comprised of the user trips' UIDs
 	 */
 	public List<Integer> getUserTrips(int userID);
-	
+
 	/**
 	 * TODO: comment
 	 * @param userID
@@ -71,7 +72,7 @@ public interface StreetEdgeManagementDriver {
 	 * @param streetEdges
 	 */
 	public void saveTrip(long userID, String tripName, List<SimplifiedTripEdge> streetEdges) throws UnableToPerformOperation;
-	
+
 	/**
 	 * Fetches all geometries from street edges, which are classified
 	 * in terms of their elevation.
@@ -82,7 +83,7 @@ public interface StreetEdgeManagementDriver {
 	 * @return List of geometries.
 	 */
 	public List<String> getAllDistinctGeometries();
-	
+
 	//@InsertUserFeedback.php
 	/**
 	 * Classifies a street edge belonging to a a user's given trip,
@@ -102,35 +103,85 @@ public interface StreetEdgeManagementDriver {
 	 * @throws UnknowStreetEdgeException 
 	 */
 	public boolean classifyStreetEdge(long tripID, long streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) throws UnknowStreetEdgeException;
-	
+
+
+	/**
+	 * Fetches the list of street edges and corresponding safety ratings
+	 * made by the specified user.
+	 * <br>
+	 * <b>Note: </b> No longer discards streets with less than two classifications.
+	 * 
+	 * @param userId The user unique identifier
+	 * 
+	 * @return List of StreetEdgeWithRating
+	 */
+	public List<StreetEdgeWithRating> getAllSafetyRatings(long userID);
+
+	/**
+	 * Fetches the list of street edges and corresponding pavement ratings
+	 * made by the specified user.
+	 * <br>
+	 * <b>Note: </b> No longer discards streets with less than two classifications.
+	 * 
+	 * @param userId The user unique identifier
+	 * 
+	 * @return List of StreetEdgeWithRating
+	 */
+	public List<StreetEdgeWithRating> getAllPavementRatings(long userID);
+
+	/**
+	 * Fetches the list of street edges and corresponding rails ratings
+	 * made by the specified user.
+	 * <br>
+	 * <b>Note: </b> No longer discards streets with less than two classifications.
+	 * 
+	 * @param userId The user unique identifier
+	 * 
+	 * @return List of StreetEdgeWithRating
+	 */
+	public List<StreetEdgeWithRating> getAllRailsRatings(long userID);
+
+	/**
+	 * Fetches the list of street edges and corresponding elevation ratings
+	 * made by the specified user.
+	 * <br>
+	 * <b>Note: </b> No longer discards streets with less than two classifications.
+	 * 
+	 * @param userId The user unique identifier
+	 * 
+	 * @return List of StreetEdgeWithRating
+	 */
+	public List<StreetEdgeWithRating> getAllElevationRatings(long userID);
+
+	public double[] getAllSafetyFactors();
+
+	public double[] getAllElevationFactors();
+
+	public double[] getAllPavementFactors();
+
+	public double[] getAllRailsFactors();
+
+	public HashMap<Double, List<UserRating>> getAllSafetyRatings();
+
+	public HashMap<Double, List<UserRating>> getAllPavementRatings();
+
+	public HashMap<Double, List<UserRating>> getAllRailsRatings();
+
+	public HashMap<Double, List<UserRating>> getAllElevationRatings();
+
+	//TODO: daqui para baixo nao está nada implementado
 	//BACK-END
 	public boolean isEmptyMap();
-	
+
 	//public void populateStreetEdges(Graph graph);
-	
+
 	public void populateStreetEdges(List<CustomStreetEdge> streetEdges);
-	
-	public HashMap<Long, List<UserRating>> getAllSafetyRatings();
-	
-	public HashMap<Long, List<UserRating>> getAllPavementRatings();
-	
-	public HashMap<Long, List<UserRating>> getAllRailsRatings();
-	
-	public HashMap<Long, List<UserRating>> getAllElevationRatings();
-	
-	public double[] getAllSafetyFactorsIDs();
-	
-	public double[] getAllElevationFactorsIDs();
-	
-	public double[] getAllPavementFactorsIDs();
-	
-	public double[] getAllRailsFactorsIDs();
-	
-	public boolean clearAndUpdateConsolidatedElevationRatings(HashMap<Integer, Integer> ratings);
-	
-	public boolean clearAndUpdateConsolidatedSafetyRatings(HashMap<Integer, Integer> ratings);
-	
-	public boolean clearAndUpdateConsolidatedPavementRatings(HashMap<Integer, Integer> ratings);
-	
-	public boolean clearAndUpdateConsolidatedRailsRatings(HashMap<Integer, Integer> ratings);
+
+	public boolean updateConsolidatedElevationRatings(HashMap<Double, Integer> ratings);
+
+	public boolean updateConsolidatedSafetyRatings(HashMap<Double, Integer> ratings);
+
+	public boolean updateConsolidatedPavementRatings(HashMap<Double, Integer> ratings);
+
+	public boolean updateConsolidatedRailsRatings(HashMap<Double, Integer> ratings);
 }

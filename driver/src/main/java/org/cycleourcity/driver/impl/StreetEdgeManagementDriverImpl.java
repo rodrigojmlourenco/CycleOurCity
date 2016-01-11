@@ -12,6 +12,7 @@ import org.cycleourcity.driver.database.structures.CustomStreetEdge;
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
+import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.Trip;
 import org.cycleourcity.driver.database.structures.UserRating;
 import org.cycleourcity.driver.exceptions.StreetEdgeNotFoundException;
@@ -21,25 +22,25 @@ import org.cycleourcity.driver.exceptions.UnsupportedCriterionException;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
 
 public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDriver{
-	
+
 	private final TripsDriver tripsDriver;
 	private final StreetEdgesDriver streetEdgesDriver;
-	
+
 	private final static StreetEdgeManagementDriverImpl MANAGER = new StreetEdgeManagementDriverImpl();
-	
-	
+
+
 	private StreetEdgeManagementDriverImpl(){
 		tripsDriver = MariaDriver.getDriver();
 		streetEdgesDriver = MariaDriver.getDriver();
 	}
-	
+
 	public static StreetEdgeManagementDriverImpl getManager(){
 		return MANAGER;
 	}
 
 	@Override
 	public List<SimplifiedStreetEdge> getStreetEdgesWithElevation() {
-	
+
 		try {
 			return streetEdgesDriver.getAllStreetEdgesWithElevation();
 		} catch (SQLException e) {
@@ -60,37 +61,37 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 
 	@Override
 	public Trip getTrip(int tripID) throws StreetEdgeNotFoundException {
-		
+
 		Trip trip;
 		GeoLocation from, to;
 		SimplifiedTripEdge fromEdge, toEdge;
 		List<SimplifiedTripEdge> tripEdges;
-		
+
 		try {
-			
+
 			tripEdges = tripsDriver.getTripStreetEdges(tripID);
-			
+
 			if(tripEdges == null || tripEdges.isEmpty()) return null;
-			
+
 			fromEdge= tripEdges.get(0);
 			toEdge 	= tripEdges.get(tripEdges.size()-1);
-			
+
 			from= streetEdgesDriver.getSteetEdgeFromLocation(fromEdge.getStreetEdgeID());
 			to	= streetEdgesDriver.getSteetEdgeToLocation(toEdge.getStreetEdgeID());
-			
+
 			trip = new Trip(from, to, tripEdges);
 			return trip;
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
 	@Override
 	public List<Integer> getUserTrips(int userID) {
-		
+
 		try {
 			return tripsDriver.getUsersTrips(userID);
 		} catch (SQLException e) {
@@ -102,7 +103,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 
 	@Override
 	public List<String> getAllDistinctGeometries() {
-		
+
 		try {
 			return streetEdgesDriver.getAllDistinctGeometries();
 		} catch (SQLException e) {
@@ -114,19 +115,19 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	private boolean validElevationFactor(int factor){
 		return factor > 0 && factor <= 6;
 	}
-	
+
 	private boolean validSafetyFactor(int factor){
 		return factor > 0 && factor <= 6;
 	}
-	
+
 	private boolean validPavementFactor(int factor){
 		return factor > 0 && factor <= 4;
 	}
-	
+
 	private boolean validPavementRails(int factor){
 		return factor > 0 && factor <= 3;
 	}
-	
+
 	@Override
 	public boolean classifyStreetEdge(long tripID, long streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) 
 			throws UnknowStreetEdgeException {
@@ -138,7 +139,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 			e.printStackTrace();
 			throw new UnknowStreetEdgeException();
 		}
-		
+
 		if(safety != -1 && validSafetyFactor(safety))
 			try {
 				streetEdgesDriver.classifyStreetEdge(Criteria.safety, streetEdgeID, safety, userID);
@@ -149,19 +150,19 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
-		
+
+
 		if(elevation != -1 && validElevationFactor(elevation));
-			try {
-				streetEdgesDriver.classifyStreetEdge(Criteria.elevation, streetEdgeID, elevation, userID);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedCriterionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+		try {
+			streetEdgesDriver.classifyStreetEdge(Criteria.elevation, streetEdgeID, elevation, userID);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedCriterionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		if(pavement != -1 && validPavementFactor(pavement))
 			try {
 				streetEdgesDriver.classifyStreetEdge(Criteria.pavement, streetEdgeID, pavement, userID);
@@ -172,7 +173,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
+
 		if(rails != -1 && validPavementRails(rails))
 			try {
 				streetEdgesDriver.classifyStreetEdge(Criteria.rails, streetEdgeID, rails, userID);
@@ -183,7 +184,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
+
 		if(last){
 			try {
 				tripsDriver.deleteTripStreetEdges(tripID);
@@ -192,12 +193,12 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 				e.printStackTrace();
 			}
 		}
-		
+
 		return false;
 	}
 
-	
-	
+
+
 	@Override
 	public boolean isEmptyMap(){
 		try {
@@ -210,22 +211,22 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 
 	@Override
 	public void populateStreetEdges(List<CustomStreetEdge> streetEdges){
-		
+
 		int i=0;
 		double id;
 		boolean error = false;;
 		String name, geometry;
 		GeoLocation from, to;
-		
+
 		for(CustomStreetEdge se : streetEdges){
-			
+
 			id		= se.getId();
 			name 	= se.getName();
 			from	= se.getFrom();
 			to		= se.getTo();
 			geometry= "DIFFERENT FROM OG VERSION";
-			
-			
+
+
 			try {
 				streetEdgesDriver.insertStreetEdge(id, name, from, to, geometry);
 				i++;
@@ -233,107 +234,116 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 				error = true;
 				e.printStackTrace();
 			}
-		
+
 			if((i % 1000) == 0)
 				System.out.print("|");
 		}
-		
+
 		if(error) 
 			System.out.println("\nNot all street edges were successfully inserted.");
 		else 
 			System.out.println("\nAll "+i+" street edges inserted successfully.");
-		
+
 	}
 
 	@Override
-	public HashMap<Long, List<UserRating>> getAllSafetyRatings() {
-		// TODO Auto-generated method stub
-		return null;
+	public HashMap<Double, List<UserRating>> getAllSafetyRatings() {
+		try {
+			return streetEdgesDriver.getAllSafetyRatings();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public HashMap<Long, List<UserRating>> getAllPavementRatings() {
-		// TODO Auto-generated method stub
-		return null;
+	public HashMap<Double, List<UserRating>> getAllPavementRatings() {
+		try {
+			return streetEdgesDriver.getAllPavementRatings();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public HashMap<Long, List<UserRating>> getAllRailsRatings() {
-		// TODO Auto-generated method stub
-		return null;
+	public HashMap<Double, List<UserRating>> getAllRailsRatings() {
+		try {
+			return streetEdgesDriver.getAllRailsRatings();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public HashMap<Long, List<UserRating>> getAllElevationRatings() {
-		// TODO Auto-generated method stub
-		return null;
+	public HashMap<Double, List<UserRating>> getAllElevationRatings() {
+		try {
+			return streetEdgesDriver.getAllElevationRatings();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public double[] getAllSafetyFactorsIDs() {
-		// TODO Auto-generated method stub
-		return null;
+	public double[] getAllSafetyFactors() {
+
+		try {
+			return streetEdgesDriver.getAllSafetyFactors();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public double[] getAllElevationFactorsIDs() {
-		// TODO Auto-generated method stub
-		return null;
+	public double[] getAllElevationFactors() {
+		try {
+			return streetEdgesDriver.getAllElevationFactors();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public double[] getAllPavementFactorsIDs() {
-		// TODO Auto-generated method stub
-		return null;
+	public double[] getAllPavementFactors() {
+		try {
+			return streetEdgesDriver.getAllPavementFactors();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
-	public double[] getAllRailsFactorsIDs() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean clearAndUpdateConsolidatedElevationRatings(HashMap<Integer, Integer> ratings) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean clearAndUpdateConsolidatedSafetyRatings(HashMap<Integer, Integer> ratings) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean clearAndUpdateConsolidatedPavementRatings(HashMap<Integer, Integer> ratings) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean clearAndUpdateConsolidatedRailsRatings(HashMap<Integer, Integer> ratings) {
-		// TODO Auto-generated method stub
-		return false;
+	public double[] getAllRailsFactors() {
+		try {
+			return streetEdgesDriver.getAllRailsFactors();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
 	public void saveTrip(long userID, String tripName, List<SimplifiedTripEdge> streetEdges) 
 			throws UnableToPerformOperation{
-		
+
 		int tripId;
 		List<Integer> userTrips;
-		
+
 		try {
 			tripsDriver.insertTrip(userID, tripName);
 
 			userTrips = tripsDriver.getUsersTrips(userID);
 			tripId = userTrips.get(userTrips.size()-1);
-			
+
 			for(SimplifiedTripEdge se : streetEdges)
 				tripsDriver.insertTripStreetEdge(tripId, se.getStreetEdgeID(), se.isBicycleMode());
-			
-			
+
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new UnableToPerformOperation(e.getMessage());
@@ -341,5 +351,94 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 			e.printStackTrace();
 			throw new UnableToPerformOperation(e.getMessage());
 		}
+	}
+
+
+
+	@Override
+	public boolean updateConsolidatedElevationRatings(HashMap<Double, Integer> ratings) {
+
+		boolean success = true;
+
+		for(double key: ratings.keySet())
+			try {
+				streetEdgesDriver.updateConsolidatedElevationRating(key, ratings.get(key));
+			} catch (SQLException e) {
+				e.printStackTrace();
+				success = false;
+			}
+
+		return success;
+	}
+
+	@Override
+	public boolean updateConsolidatedSafetyRatings(HashMap<Double, Integer> ratings) {
+		boolean success = true;
+
+		for(double key: ratings.keySet())
+			try {
+				streetEdgesDriver.updateConsolidatedSafetyRating(key, ratings.get(key));
+			} catch (SQLException e) {
+				e.printStackTrace();
+				success = false;
+			}
+
+		return success;
+	}
+
+	@Override
+	public boolean updateConsolidatedPavementRatings(HashMap<Double, Integer> ratings) {
+		
+		boolean success = true;
+
+		for(double key: ratings.keySet())
+			try {
+				streetEdgesDriver.updateConsolidatedPavementRating(key, ratings.get(key));
+			} catch (SQLException e) {
+				e.printStackTrace();
+				success = false;
+			}
+
+		return success;
+	}
+
+	@Override
+	public boolean updateConsolidatedRailsRatings(HashMap<Double, Integer> ratings) {
+		
+		boolean success = true;
+
+		for(double key: ratings.keySet())
+			try {
+				streetEdgesDriver.updateConsolidatedRailsRating(key, ratings.get(key));
+			} catch (SQLException e) {
+				e.printStackTrace();
+				success = false;
+			}
+
+		return success;
+	}
+	
+	@Override
+	public List<StreetEdgeWithRating> getAllSafetyRatings(long userID) {
+
+		return null;
+	}
+
+	@Override
+	public List<StreetEdgeWithRating> getAllPavementRatings(long userID) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<StreetEdgeWithRating> getAllRailsRatings(long userID) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<StreetEdgeWithRating> getAllElevationRatings(long userID) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

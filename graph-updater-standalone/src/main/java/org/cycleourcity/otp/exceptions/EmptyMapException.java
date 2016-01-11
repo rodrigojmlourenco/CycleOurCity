@@ -1,4 +1,4 @@
-package org.cycleourcity.graph_updater_standalone.exceptions;
+package org.cycleourcity.otp.exceptions;
 
 public class EmptyMapException extends Exception {
 

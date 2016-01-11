@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserRating {
+	
 	private String username;
 	private Long userId;
 	private List<Long> ratings;

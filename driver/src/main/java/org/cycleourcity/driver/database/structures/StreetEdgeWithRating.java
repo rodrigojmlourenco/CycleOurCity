@@ -1,25 +1,29 @@
-package org.cycleourcity.graph_updater_standalone;
+package org.cycleourcity.driver.database.structures;
 
 public class StreetEdgeWithRating {
-	private Long streetEdgeId;
-	private Long lastRating;
+	private double streetEdgeId;
+	private long lastRating;
 	
-	public StreetEdgeWithRating(Long streetEdgeId, Long lastRating){
+	public StreetEdgeWithRating(double streetEdgeId, Long lastRating){
 		this.streetEdgeId = streetEdgeId;
 		this.lastRating = lastRating;
 	}
 
-	public Long getStreetEdgeId() {
+	public double getStreetEdgeId() {
 		return streetEdgeId;
 	}
 	
-	//é a vida :(
-	public Long getUserId(){
+	public double getUserId(){
 		return streetEdgeId;
 	}
 
 	public Long getLastRating() {
 		return lastRating;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return streetEdgeId == ((StreetEdgeWithRating)obj).getStreetEdgeId();
 	}
 	
 }

@@ -1,17 +1,20 @@
 package org.cycleourcity.driver.database;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.cycleourcity.driver.database.structures.CustomStreetEdge;
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
+import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
+import org.cycleourcity.driver.database.structures.UserRating;
 import org.cycleourcity.driver.exceptions.StreetEdgeNotFoundException;
 import org.cycleourcity.driver.exceptions.UnsupportedCriterionException;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
 
 public interface StreetEdgesDriver {
-	
+
 	/**
 	 * Creates a new street edge entry.
 	 * 
@@ -25,7 +28,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 */
 	public boolean insertStreetEdge(double id, String name, GeoLocation from, GeoLocation to, String geometry) throws SQLException;
-	
+
 	/**
 	 * Deletes a specific street edge entry.
 	 * 
@@ -36,7 +39,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 */
 	public boolean deleteStreetEdge(double streetEdgeID) throws SQLException;
-	
+
 	/**
 	 * Fetches a specific street edge starting location.
 	 * 
@@ -50,7 +53,7 @@ public interface StreetEdgesDriver {
 	 * @see {@link GeoLocation}
 	 */
 	public GeoLocation getSteetEdgeFromLocation(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
-	
+
 	/**
 	 * Fetches a specific street edge finishing location.
 	 * 
@@ -64,7 +67,7 @@ public interface StreetEdgesDriver {
 	 * @see {@link GeoLocation}
 	 */
 	public GeoLocation getSteetEdgeToLocation(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
-	
+
 	/**
 	 * Fetches a specific street edge name.
 	 * 
@@ -76,7 +79,7 @@ public interface StreetEdgesDriver {
 	 * @throws StreetEdgeNotFoundException 
 	 */
 	public String getSteetEdgeName(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
-	
+
 	/**
 	 * Fetches a specific street edge geometry.
 	 * 
@@ -88,7 +91,7 @@ public interface StreetEdgesDriver {
 	 * @throws StreetEdgeNotFoundException 
 	 */
 	public String getSteetEdgeGeometry(double streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
-	
+
 	/**
 	 * Fetches a street edge as an object.
 	 * 
@@ -117,7 +120,7 @@ public interface StreetEdgesDriver {
 	 * @throws UnsupportedCriterionException 
 	 */
 	public boolean classifyStreetEdge(Criteria criterion, double streetEdgeID, int factorID, long userID) throws SQLException, UnsupportedCriterionException;
-	
+
 	/**
 	 * Fetches all the classification factors identifiers with regard
 	 * to the classifications provided for the specified street edge.
@@ -130,7 +133,7 @@ public interface StreetEdgesDriver {
 	 * @throws UnsupportedCriterionException 
 	 */
 	public List<Integer> getStreetEdgeClassifications(Criteria criterion, double streetEdgeID) throws SQLException, UnsupportedCriterionException;
-	
+
 	/**
 	 * Checks if the street edges tables, which characterizes the a city's map,
 	 * is empty or not.
@@ -140,37 +143,7 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException
 	 */
 	public boolean isEmptyMap() throws SQLException;
-	
-	/**
-	 * Fetches all classification provided by a specific user,
-	 * for a specific classification criterion.
-	 * 
-	 * @param criterion The classification criterion.
-	 * @param userID The user's UID
-	 * 
-	 * @return List of all street edges classified by the user.
-	 * @throws SQLException
-	 */
-	public List<Integer> getUserClassifiedStreetEdges(Criteria criterion, long userID) throws SQLException;
-	
-	
-	/**
-	 * Fetches all the street edges that are classified with regard to their elevation.
-	 * @return List of edges with elevation classifications
-	 * @throws SQLException
-	 * @see {@link SimplifiedElevationEdge}
-	 */
-	public List<SimplifiedStreetEdge> getAllStreetEdgesWithElevation() throws SQLException;
-	
-	/**
-	 * Fetches all the street edges that are classified with regard to their safety.
-	 * @return List of edges with safety classifications
-	 * @throws SQLException
-	 * @see {@link SimplifiedElevationEdge}
-	 */
-	public List<SimplifiedStreetEdge> getAllStreetEdgesWithSafety() throws SQLException;
-	
-	
+
 	/**
 	 * Fetches all geometries from street edges, which are classified
 	 * in terms of their elevation.
@@ -179,4 +152,107 @@ public interface StreetEdgesDriver {
 	 * @throws SQLException 
 	 */
 	public List<String> getAllDistinctGeometries() throws SQLException;
+
+
+	/**
+	 * Fetches the constant factors that define a street's safety.
+	 * 
+	 * @return The criterion factor
+	 * @throws SQLException
+	 */
+	public double[] getAllSafetyFactors() throws SQLException;
+
+	/**
+	 * Fetches the constant factors that define a street's elevation.
+	 * 
+	 * @return The criterion factor
+	 * @throws SQLException
+	 */
+	public double[] getAllElevationFactors() throws SQLException;
+
+	/**
+	 * Fetches the constant factors that define a street's pavement.
+	 * 
+	 * @return The criterion factor
+	 * @throws SQLException
+	 */
+	public double[] getAllPavementFactors() throws SQLException;
+
+	/**
+	 * Fetches the constant factors that define a street's rails.
+	 * 
+	 * @return The criterion factor
+	 * @throws SQLException
+	 */
+	public double[] getAllRailsFactors() throws SQLException;
+
+	/**
+	 * Fetches a map, which is indexed by street edge id, and that contains
+	 * a list of all user safety ratings. Each UserRating in the list pertains to
+	 * a particular user.
+	 * 
+	 * @return Map of list of user ratings per street edge.
+	 * 
+	 * @throws SQLException
+	 */
+	public HashMap<Double, List<UserRating>> getAllSafetyRatings() throws SQLException;
+
+	/**
+	 * Fetches a map, which is indexed by street edge id, and that contains
+	 * a list of all user pavement ratings. Each UserRating in the list pertains to
+	 * a particular user.
+	 * 
+	 * @return Map of list of user ratings per street edge.
+	 * 
+	 * @throws SQLException
+	 */
+	public HashMap<Double, List<UserRating>> getAllPavementRatings() throws SQLException;
+
+	/**
+	 * Fetches a map, which is indexed by street edge id, and that contains
+	 * a list of all user elevation ratings. Each UserRating in the list pertains to
+	 * a particular user.
+	 * 
+	 * @return Map of list of user ratings per street edge.
+	 * 
+	 * @throws SQLException
+	 */
+	public HashMap<Double, List<UserRating>> getAllElevationRatings() throws SQLException;
+
+	/**
+	 * Fetches a map, which is indexed by street edge id, and that contains
+	 * a list of all user rails ratings. Each UserRating in the list pertains to
+	 * a particular user.
+	 * 
+	 * @return Map of list of user ratings per street edge.
+	 * 
+	 * @throws SQLException
+	 */
+	public HashMap<Double, List<UserRating>> getAllRailsRatings() throws SQLException;
+
+	//TODO: daqui para baixo extá tudo por terminar/implementar
+	
+	public List<StreetEdgeWithRating> getAllSafetyRatingsByUser(long userId) throws SQLException;
+	
+	public List<StreetEdgeWithRating> getAllSafetyElevationByUser(long userId) throws SQLException;
+	
+	public List<StreetEdgeWithRating> getAllSafetyPavementByUser(long userId) throws SQLException;
+	
+	public List<StreetEdgeWithRating> getAllSafetyRailsByUser(long userId) throws SQLException;
+
+	public void updateConsolidatedSafetyRating(double streetEdgeId, int rating) throws SQLException;
+	
+	public void updateConsolidatedElevationRating(double streetEdgeId, int rating) throws SQLException;
+	
+	public void updateConsolidatedPavementRating(double streetEdgeId, int rating) throws SQLException;
+	
+	public void updateConsolidatedRailsRating(double streetEdgeId, int rating) throws SQLException;
+
+	
+	public List<SimplifiedStreetEdge> getAllStreetEdgesWithElevation() throws SQLException;
+
+	public List<Integer> getUserClassifiedStreetEdges(Criteria criterion, long userID) throws SQLException;
+
+	public List<SimplifiedStreetEdge> getAllStreetEdgesWithSafety() throws SQLException;
+
 }

@@ -1,4 +1,4 @@
-package org.cycleourcity.graph_updater_standalone;
+package org.cycleourcity.otp.utils;
 
 public interface Utils {
 	
