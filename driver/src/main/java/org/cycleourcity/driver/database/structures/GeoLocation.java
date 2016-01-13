@@ -19,4 +19,13 @@ public class GeoLocation {
 		return ""+latitude+","+longitude;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		
+		GeoLocation aux = (GeoLocation) obj;
+		
+		return latitude == aux.getLatitude() && longitude == aux.getLongitude();
+		
+	}
+	
 }

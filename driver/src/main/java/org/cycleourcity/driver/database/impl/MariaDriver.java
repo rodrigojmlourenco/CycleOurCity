@@ -46,8 +46,11 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	private MariaDriver(){
 
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+DATABASE+"?characterEncoding=utf8", USERNAME, PASSWORD);
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/"+DATABASE, USERNAME, PASSWORD);
 		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
@@ -643,21 +646,21 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	/////////////////////////////////////////////////////////
 
 	@Override
-	public boolean insertStreetEdge(double id, String name, GeoLocation from, GeoLocation to, String geometry)
+	public boolean insertStreetEdge(String id, String name, GeoLocation from, GeoLocation to, int otpID)
 			throws SQLException {
 
 		PreparedStatement statement =
 				conn.prepareStatement(
-						"INSERT INTO streetedges (Id, Name, FromVertexLatitude, FromVertexLongitude, ToVertexLatitude, ToVertexLongitude, Geometry) "
+						"INSERT INTO streetedges (Id, Name, FromVertexLatitude, FromVertexLongitude, ToVertexLatitude, ToVertexLongitude, OTPId) "
 								+ "VALUES (?,?,?,?,?,?,?)");
 
-		statement.setDouble(1, id);
+		statement.setString(1, id);
 		statement.setString(2, name);
 		statement.setDouble(3, from.getLatitude());
 		statement.setDouble(4, from.getLongitude());
 		statement.setDouble(5, to.getLatitude());
 		statement.setDouble(6, to.getLongitude());
-		statement.setString(7, geometry);
+		statement.setInt(7, otpID);
 
 		int count = statement.executeUpdate();
 		statement.close();
@@ -972,6 +975,16 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		return users;
 	}
 
+	private int getResultSetSize(ResultSet set) throws SQLException{
+		int size;
+		
+		set.last();
+		size = set.getRow();
+		set.first();
+		
+		return size;
+	}
+	
 	@Override
 	public double[] getAllSafetyFactors() throws SQLException {
 
@@ -981,9 +994,9 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		ResultSet set = statement.executeQuery(
 				"SELECT Factor FROM safety;");
 
-
-		results = new double[set.getFetchSize()];
-
+		results = new double[getResultSetSize(set)];
+		set.first();
+		
 		int i = 0;
 		while(set.next()){
 			results[i] = set.getDouble("Factor");
@@ -1002,7 +1015,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 				"SELECT Factor FROM elevation;");
 
 
-		results = new double[set.getFetchSize()];
+		results = new double[getResultSetSize(set)];
 
 		int i = 0;
 		while(set.next()){
@@ -1022,7 +1035,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 				"SELECT Factor FROM pavement;");
 
 
-		results = new double[set.getFetchSize()];
+		results = new double[getResultSetSize(set)];
 
 		int i = 0;
 		while(set.next()){
@@ -1042,7 +1055,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 				"SELECT Factor FROM rails;");
 
 
-		results = new double[set.getFetchSize()];
+		results = new double[getResultSetSize(set)];
 
 		int i = 0;
 		while(set.next()){

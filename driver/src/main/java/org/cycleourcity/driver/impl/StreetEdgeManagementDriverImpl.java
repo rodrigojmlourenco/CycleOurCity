@@ -213,10 +213,11 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	public void populateStreetEdges(List<CustomStreetEdge> streetEdges){
 
 		int i=0;
-		double id;
+		String id;
 		boolean error = false;;
-		String name, geometry;
+		String name;
 		GeoLocation from, to;
+		int otpID;
 
 		for(CustomStreetEdge se : streetEdges){
 
@@ -224,11 +225,11 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 			name 	= se.getName();
 			from	= se.getFrom();
 			to		= se.getTo();
-			geometry= "DIFFERENT FROM OG VERSION";
+			otpID	= se.getOTPID();
 
 
 			try {
-				streetEdgesDriver.insertStreetEdge(id, name, from, to, geometry);
+				streetEdgesDriver.insertStreetEdge(id, name, from, to, otpID);
 				i++;
 			} catch (SQLException e) {
 				error = true;

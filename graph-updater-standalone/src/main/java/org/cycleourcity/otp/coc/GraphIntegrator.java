@@ -12,116 +12,123 @@ import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.UserRating;
 import org.cycleourcity.driver.impl.AccountManagementDriverImpl;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
+import org.cycleourcity.otp.coc.exceptions.RepeatedIdsException;
 import org.cycleourcity.otp.data.UserStats;
 import org.cycleourcity.otp.planner.exceptions.UnsupportedCriterionException;
 import org.cycleourcity.otp.utils.SafetyUtils;
 import org.cycleourcity.otp.utils.SlopeUtils;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.graph.Graph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
-public class CoCtoOTPUpdater {
+public class GraphIntegrator {
 
+	
+	private static Logger LOG = LoggerFactory.getLogger(GraphIntegrator.class);
+	
 	public static final double REPUTATION_FACTOR = 0.2;
-	
+
 	protected static final String
-		NEW_GRAPH = System.getenv("HOME")+"/otp/graph/new/Graph.obj",
-		OLD_GRAPH = System.getenv("HOME")+"/otp/graph/old/Graph.obj";
-	
+	NEW_GRAPH = System.getenv("HOME")+"/otp/graph/new/Graph.obj",
+	OLD_GRAPH = System.getenv("HOME")+"/otp/graph/old/Graph.obj";
+
 	/** The factors, which are basically constants, that characterize the safety values */
 	private double[] _safetyRatingsToFactors;
 	/** The factors, which are basically constants, that characterize the elevation values */
 	private double[] _elevationRatingsToFactors;
-	
+
 	//<IdTroço, ratings>
 	/** All the street edges classified in terms of safety */
 	HashMap<Double,List<UserRating>> usersSafetyRatings;
 	/** All the street edges classified in terms of elevation */
 	HashMap<Double,List<UserRating>> usersElevationRatings;
-	
+
 	HashMap<Double, StreetEdgeStatistics> safetyStats;
 	HashMap<Double, StreetEdgeStatistics> elevationStats;
-	
-	
+
+
 	//<UserId, ratings>
 	/** All the street edges classified, in terms of safety, by a specific user */
 	HashMap<Long, List<StreetEdgeWithRating>> safetyRatingsByUser;
 	/** All the street edges classified, in terms of elevation, by a specific user */
 	HashMap<Long, List<StreetEdgeWithRating>> elevationRatingsByUser;
 
-	
-	
 
 	/** The reputation off all users in terms of the safety criteria */
 	//HashMap<Long, Double> safetyReputationByUser;
-	
+
 	/** The reputation off all users in terms of the elevation criteria */
 	//HashMap<Long, Double> elevationReputationByUser;
-	
+
 	HashMap<Long, UserStats> userStatistics;
-	
+
 	private CycleOurCityBridge _exportRatings;
-	
+
 	private Graph _graph;
 	
+	private boolean hasData = false;
+
 	private AccountManagementDriver accManager 	= AccountManagementDriverImpl.getManager();
 	//private StreetEdgeManagementDriver streetManager 	= StreetEdgeManagementDriverImpl.getManager(); 
-	
-	public CoCtoOTPUpdater(Graph graph){
-		
+
+	public GraphIntegrator(Graph graph) throws RepeatedIdsException{
+
 		_graph = graph;
 		_exportRatings = new CycleOurCityBridge(graph);
-		
-		//These are fixed values
-		_safetyRatingsToFactors = _exportRatings.exportCriterionFactors(Criteria.safety);
-		_elevationRatingsToFactors = _exportRatings.exportCriterionFactors(Criteria.elevation);
-		
-		update();
 
+		//These are fixed values
+		_safetyRatingsToFactors 	= _exportRatings.exportCriterionFactors(Criteria.safety);
+		_elevationRatingsToFactors 	= _exportRatings.exportCriterionFactors(Criteria.elevation);
+
+		update();
 	}
-	
+
 	public void update(){
-		
+
 		// Step 0 - allocate all support structures
 		safetyStats = new HashMap<>();
 		elevationStats = new HashMap<>();
-		
-		//safetyReputationByUser = new HashMap<Long, Double>();
-		//elevationReputationByUser = new HashMap<Long, Double>();
+
 		userStatistics = new HashMap<>();
-		
+
 		safetyRatingsByUser = new HashMap<Long, List<StreetEdgeWithRating>>();
 		elevationRatingsByUser = new HashMap<Long, List<StreetEdgeWithRating>>();
 
 		usersSafetyRatings = _exportRatings.exportSafetyRatings();
 		usersElevationRatings = _exportRatings.exportElevationRatings();
-		
+
 		// Step 1 - WTF? Populate the StreetEdgesWithRatings map?
 		//int numUsers = _exportRatings.getNumberOfUsers();
 		ArrayList<Long> users = (ArrayList<Long>) accManager.getAllUsersIDs();
-		
-		//for(int userId = 1; userId <= numUsers; userId++){
-		for(Long userId : users){
-			//TODO: handle this shit
-			List<StreetEdgeWithRating> safetyRatings = _exportRatings.exportSafetyRatingsByUserId(userId);
-			List<StreetEdgeWithRating> elevationRatings = _exportRatings.exportElevationRatingsByUserId(userId); 
-			
-			safetyRatingsByUser.put(userId, safetyRatings);
-			elevationRatingsByUser.put(userId, elevationRatings);
-		}
-		
-		// Step 2 - Compute the rating's statistics of each street edge 
-				for(Double id : usersSafetyRatings.keySet())
-					safetyStats.put(id, new StreetEdgeStatistics(id, usersSafetyRatings.get(id)));
-				
-				for(Double id : usersElevationRatings.keySet())
-					elevationStats.put(id, new StreetEdgeStatistics(id, usersElevationRatings.get(id)));
-		
-		// Step 3 - Compute the reputation of each user
-		for(Long userId : users)
-			computeReputation(userId);
 
+		if(!(users == null) && !(users.size() == 0)){//Proceed only if there are registered users
+			
+			for(Long userId : users){
+				List<StreetEdgeWithRating> safetyRatings = _exportRatings.exportSafetyRatingsByUserId(userId);
+				List<StreetEdgeWithRating> elevationRatings = _exportRatings.exportElevationRatingsByUserId(userId); 
+
+				safetyRatingsByUser.put(userId, safetyRatings);
+				elevationRatingsByUser.put(userId, elevationRatings);
+			}
+
+			// Step 2 - Compute the rating's statistics of each street edge
+			for(Double id : usersSafetyRatings.keySet())
+				safetyStats.put(id, new StreetEdgeStatistics(id, usersSafetyRatings.get(id)));
+
+			for(Double id : usersElevationRatings.keySet())
+				elevationStats.put(id, new StreetEdgeStatistics(id, usersElevationRatings.get(id)));
+
+			// Step 3 - Compute the reputation of each user
+			for(Long userId : users)
+				computeReputation(userId);
+			
+			hasData = true;
+			
+		}else
+			LOG.error("No users found, skipping ratings and reputation computations.");
 	}
 
 	/** Computes the reputation of a specific user, both in terms of the safety and elevation
@@ -133,19 +140,17 @@ public class CoCtoOTPUpdater {
 	 * @param userId A long that uniquely identifies a specific user.
 	 */
 	private void computeReputation(long userId){	
-		
+
 		double safetyReputation, elevationReputation;
 
 		safetyReputation 	= consolidateSimilarityMeasureOfRatings(safetyRatingsByUser.get(userId), safetyStats,REPUTATION_FACTOR);
-	    elevationReputation = consolidateSimilarityMeasureOfRatings(elevationRatingsByUser.get(userId), safetyStats,REPUTATION_FACTOR);
-	    
-	    UserStats stats = new UserStats(userId, safetyReputation, elevationReputation);
-	    
-	    userStatistics.put(userId, stats);
-	    //safetyReputationByUser.put(userId, new Double(safetyReputation));
-	    //elevationReputationByUser.put(userId, new Double(elevationReputation));
+		elevationReputation = consolidateSimilarityMeasureOfRatings(elevationRatingsByUser.get(userId), safetyStats,REPUTATION_FACTOR);
+
+		UserStats stats = new UserStats(userId, safetyReputation, elevationReputation);
+
+		userStatistics.put(userId, stats);
 	}
-	
+
 	/**
 	 * Computes a user's reputation factor, given all of his classified street edges, and the
 	 * classifications performed by the other users, according to some classification criteria.
@@ -170,33 +175,33 @@ public class CoCtoOTPUpdater {
 			List<StreetEdgeWithRating> streetEdgeRatings,
 			HashMap<Double, StreetEdgeStatistics> stats,
 			double reputationFactor){
-		
+
 		int n = streetEdgeRatings.size();
-		
+
 		if(n == 0) return 0;
-		
+
 		double value = 0;
 		if(n > 5){
-			
+
 			for(StreetEdgeWithRating se : streetEdgeRatings){
 				value += computeSimilarityMeasureOfRating(se, stats.get(se.getStreetEdgeId()));
 				value *= reputationFactor;
 			}
-			
+
 			return value * (1-reputationFactor);
-			
+
 		}else{
-			
+
 			for(StreetEdgeWithRating se : streetEdgeRatings){
 				value += computeSimilarityMeasureOfRating(se, stats.get(se.getStreetEdgeId()));
 				value *= reputationFactor;
 			}
-			
+
 			return value * (n-1)*reputationFactor;
 		}
-		
+
 	}
-	
+
 	/**
 	 * Given a specific street edge and the classification provided by a specific user, this function
 	 * compares the user's classification with the other classifications, provided by other users. This
@@ -211,22 +216,22 @@ public class CoCtoOTPUpdater {
 	private double computeSimilarityMeasureOfRating(
 			StreetEdgeWithRating sewr,
 			StreetEdgeStatistics stats){
-		
+
 		double average = stats.getAverageRating();
 		double standardDeviation = stats.getStdDevRating();
-		
+
 		if(sewr.getLastRating() >= (average - 0.5*standardDeviation) && sewr.getLastRating() <= (average + 0.5*standardDeviation)){
 			return 1.0;
 		}
-		
+
 		if(sewr.getLastRating() >= (average - 1*standardDeviation) && sewr.getLastRating() <= (average + 1*standardDeviation)){
 			return 0.5;
 		}
-		
+
 		if(sewr.getLastRating() >= (average - 1.5*standardDeviation) && sewr.getLastRating() <= (average + 1.5*standardDeviation)){
 			return 0.0;
 		}
-		
+
 		if(sewr.getLastRating() >= (average - 2.0*standardDeviation) && sewr.getLastRating() <= (average + 2.0*standardDeviation)){
 			return -0.5;
 		}
@@ -234,11 +239,11 @@ public class CoCtoOTPUpdater {
 			return -1.0;
 		}	
 	}
-	
+
 	/**
 	 * Updates identifier and safety rating of a PlainStreetEdge identified by pse.
 	 * <br>
- 	 * <b>Note:</b> This is the method that actually updates the graph.
+	 * <b>Note:</b> This is the method that actually updates the graph.
 	 * 
 	 * @param pse Integer that identifies a specific PlainStreetEdge
 	 * @param factor The rating
@@ -247,11 +252,11 @@ public class CoCtoOTPUpdater {
 	 * @see PlainStreetEdge
 	 */
 	private void setSafetyFactorAndIdToPlainStreetEdge(double pse, int id){
-		
+
 		StreetEdge edge = (StreetEdge) _graph.getEdgeById(pse);
 		edge.setBicycleSafetyFactor(SafetyUtils.getFactorFromId(id));
 	}
-	
+
 
 	/**
 	 * Updates identifier and elevation rating of a PlainStreetEdge identified by pse.
@@ -265,12 +270,12 @@ public class CoCtoOTPUpdater {
 	 * @see PlainStreetEdge
 	 */
 	private void setElevationFactorAndIdToPlainStreetEdge(double pse, int id){
-		
+
 		StreetEdge streetEdge = (StreetEdge) _graph.getEdgeById(pse);
-		
+
 		streetEdge.setSlope(SlopeUtils.getFactorFromId(id));
 	}
-	
+
 	/**
 	 * Computes the overall classification rating for a specific street edge.
 	 * <br>
@@ -291,14 +296,14 @@ public class CoCtoOTPUpdater {
 	 * @return The street edge's overall rating, for the specified criterion.
 	 */
 	private long computeOverallRating(List<UserRating> usersRatings, Criteria criterion){
-		
+
 		long userId;
 		double userReputation = 0, sum=0, denominator=0;
-		
+
 		for(UserRating rating : usersRatings){
-			
+
 			userId = rating.getUserId();
-			
+
 			switch (criterion) {
 			case safety:
 				userReputation = userStatistics.get(userId).getSafetyReputation();
@@ -307,13 +312,13 @@ public class CoCtoOTPUpdater {
 				userReputation = userStatistics.get(userId).getSafetyReputation();
 				break;
 			}
-			
+
 			if(userReputation > 0){
 				sum += rating.getRatings().get(rating.getRatings().size() - 1) * userReputation;
 				denominator += userReputation; 
 			}
 		}
-		
+
 		if(sum == 0) return usersRatings.get(0).getRatings().get(0);
 		else 		 return Math.round((double) sum / denominator);
 	}
@@ -325,21 +330,21 @@ public class CoCtoOTPUpdater {
 	 *
 	@Deprecated
 	public void updateGraphSafetyRatings(){
-		
+
 		HashMap<Integer, Integer> consolidatedRatings = new HashMap<Integer, Integer>();
-				
+
 		for(Long streetEdgeId : usersSafetyRatings.keySet()){
 			int overallRating = (int) computeOverallRating(usersSafetyRatings.get(streetEdgeId), Criterion.safety);
 			consolidatedRatings.put(streetEdgeId.intValue(), overallRating);
-			
+
 			double overallSafetyFactor = _safetyRatingsToFactors[overallRating - 1];			
 			setSafetyFactorAndIdToPlainStreetEdge(streetEdgeId.intValue(), overallSafetyFactor, overallRating);
 		}
-		
+
 		_exportRatings.insertConsolidadedSafetyRatings(consolidatedRatings);
 	}
-	*/
-	
+	 */
+
 	/**
 	 * Given all the street edges classified by the users, in terms of the elevation criterion,
 	 * this function updates the graph by updating the identifier and elevation factor of
@@ -347,21 +352,21 @@ public class CoCtoOTPUpdater {
 	 *
 	@Deprecated
 	public void updateGraphElevationRatings(){
-		
+
 		HashMap<Integer, Integer> consolidatedRatings = new HashMap<Integer, Integer>();
-		
+
 		for(Long streetEdgeId : usersElevationRatings.keySet()){
 			int overallRating = (int) computeOverallRating(usersElevationRatings.get(streetEdgeId), Criterion.elevation);
 			consolidatedRatings.put(streetEdgeId.intValue(), overallRating);
-			
+
 			double overallElevationFactor = _elevationRatingsToFactors[overallRating - 1];
 			setElevationFactorAndIdToPlainStreetEdge(streetEdgeId.intValue(), overallElevationFactor, overallRating);
 		}
-		
+
 		_exportRatings.insertConsolidadedElevationRatings(consolidatedRatings);
 	}
-	*/
-	
+	 */
+
 	/**
 	 * Given all the street edges classified by the users, in terms of the criterion,
 	 * this function updates the graph by updating the identifier and criterion factor of
@@ -371,8 +376,15 @@ public class CoCtoOTPUpdater {
 	 * @throws UnsupportedCriterionException 
 	 */
 	public void updateGraph(Criteria criterion) throws UnsupportedCriterionException{
-		HashMap<Double, Integer> consolidatedRatings = new HashMap<Double, Integer>();
 		
+		if(!hasData){
+			LOG.error("No users nor ratings registered in the database. Skipping this method.");
+			return;
+		}
+			
+		
+		HashMap<Double, Integer> consolidatedRatings = new HashMap<Double, Integer>();
+
 		HashMap<Double, List<UserRating>> userRatings;
 		switch (criterion) {
 		case safety:
@@ -386,11 +398,11 @@ public class CoCtoOTPUpdater {
 		default:
 			throw new UnsupportedCriterionException(criterion);
 		}
-		
+
 		for(double streetEdgeId : userRatings.keySet()){
 			int overallRating = (int) computeOverallRating(userRatings.get(streetEdgeId), criterion);
 			consolidatedRatings.put(streetEdgeId, overallRating);
-			
+
 			double factor;
 			switch (criterion) {
 			case safety:
@@ -409,7 +421,7 @@ public class CoCtoOTPUpdater {
 				throw new UnsupportedCriterionException(criterion);
 			}
 		}
-		
+
 		switch (criterion) {
 		case safety:
 			_exportRatings.insertConsolidadedSafetyRatings(consolidatedRatings);
@@ -423,8 +435,8 @@ public class CoCtoOTPUpdater {
 			throw new UnsupportedCriterionException(criterion);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Exports the modifications performed over the graph, into a new graph file.
 	 * @param filename The new graph filename.

@@ -4,10 +4,13 @@ import org.opentripplanner.api.model.TripPlan;
 import org.opentripplanner.routing.core.RoutingRequest;
 import org.opentripplanner.standalone.Router;
 
-public abstract class RoutePlanner{
+import org.opentripplanner.api.resource.Response;
+
+public abstract class RoutePlanner implements Runnable{
 	
 	private final Router mRouter;
 	private RoutingRequest mRequest;
+	private Response plan;
 	
 	public RoutePlanner(Router router, RoutingRequest request){
 		this.mRouter = router;
@@ -27,4 +30,13 @@ public abstract class RoutePlanner{
 	}
 	
 	public abstract TripPlan planRoute();
+	
+	public Response getTripPlan(){
+		return this.plan;
+	}
+	
+	@Override
+	public void run() {
+		planRoute();
+	}
 }

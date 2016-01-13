@@ -32,8 +32,6 @@ public class SimpleBicycleRoutePlanner extends RoutePlanner{
 		setRoutingRequest(request);
 	}
 
-
-
 	@Override
 	public TripPlan planRoute() {
 
