@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class GraphIntegrator {
 
-	
+
 	private static Logger LOG = LoggerFactory.getLogger(GraphIntegrator.class);
-	
+
 	public static final double REPUTATION_FACTOR = 0.2;
 
 	protected static final String
@@ -42,12 +42,12 @@ public class GraphIntegrator {
 
 	//<IdTroço, ratings>
 	/** All the street edges classified in terms of safety */
-	HashMap<Double,List<UserRating>> usersSafetyRatings;
+	HashMap<String,List<UserRating>> usersSafetyRatings;
 	/** All the street edges classified in terms of elevation */
-	HashMap<Double,List<UserRating>> usersElevationRatings;
+	HashMap<String,List<UserRating>> usersElevationRatings;
 
-	HashMap<Double, StreetEdgeStatistics> safetyStats;
-	HashMap<Double, StreetEdgeStatistics> elevationStats;
+	HashMap<String, StreetEdgeStatistics> safetyStats;
+	HashMap<String, StreetEdgeStatistics> elevationStats;
 
 
 	//<UserId, ratings>
@@ -68,7 +68,7 @@ public class GraphIntegrator {
 	private CycleOurCityBridge _exportRatings;
 
 	private Graph _graph;
-	
+
 	private boolean hasData = false;
 
 	private AccountManagementDriver accManager 	= AccountManagementDriverImpl.getManager();
@@ -105,7 +105,7 @@ public class GraphIntegrator {
 		ArrayList<Long> users = (ArrayList<Long>) accManager.getAllUsersIDs();
 
 		if(!(users == null) && !(users.size() == 0)){//Proceed only if there are registered users
-			
+
 			for(Long userId : users){
 				List<StreetEdgeWithRating> safetyRatings = _exportRatings.exportSafetyRatingsByUserId(userId);
 				List<StreetEdgeWithRating> elevationRatings = _exportRatings.exportElevationRatingsByUserId(userId); 
@@ -115,18 +115,18 @@ public class GraphIntegrator {
 			}
 
 			// Step 2 - Compute the rating's statistics of each street edge
-			for(Double id : usersSafetyRatings.keySet())
+			for(String id : usersSafetyRatings.keySet())
 				safetyStats.put(id, new StreetEdgeStatistics(id, usersSafetyRatings.get(id)));
 
-			for(Double id : usersElevationRatings.keySet())
+			for(String id : usersElevationRatings.keySet())
 				elevationStats.put(id, new StreetEdgeStatistics(id, usersElevationRatings.get(id)));
 
 			// Step 3 - Compute the reputation of each user
 			for(Long userId : users)
 				computeReputation(userId);
-			
+
 			hasData = true;
-			
+
 		}else
 			LOG.error("No users found, skipping ratings and reputation computations.");
 	}
@@ -173,7 +173,7 @@ public class GraphIntegrator {
 	 */
 	private double consolidateSimilarityMeasureOfRatings(
 			List<StreetEdgeWithRating> streetEdgeRatings,
-			HashMap<Double, StreetEdgeStatistics> stats,
+			HashMap<String, StreetEdgeStatistics> stats,
 			double reputationFactor){
 
 		int n = streetEdgeRatings.size();
@@ -251,10 +251,16 @@ public class GraphIntegrator {
 	 * 
 	 * @see PlainStreetEdge
 	 */
-	private void setSafetyFactorAndIdToPlainStreetEdge(double pse, int id){
+	private void setSafetyFactorAndIdToPlainStreetEdge(String pse, int id){
 
+		throw new UnsupportedOperationException();
+
+		/*
+		 * TODO: Graph should support search by string.
+		 * 
 		StreetEdge edge = (StreetEdge) _graph.getEdgeById(pse);
 		edge.setBicycleSafetyFactor(SafetyUtils.getFactorFromId(id));
+		 */
 	}
 
 
@@ -269,11 +275,17 @@ public class GraphIntegrator {
 	 * 
 	 * @see PlainStreetEdge
 	 */
-	private void setElevationFactorAndIdToPlainStreetEdge(double pse, int id){
+	private void setElevationFactorAndIdToPlainStreetEdge(String pse, int id){
 
+		throw new UnsupportedOperationException();
+
+		/*
+		 * TODO: Graph should support search by string.
+		 *
 		StreetEdge streetEdge = (StreetEdge) _graph.getEdgeById(pse);
 
 		streetEdge.setSlope(SlopeUtils.getFactorFromId(id));
+		 */
 	}
 
 	/**
@@ -376,16 +388,16 @@ public class GraphIntegrator {
 	 * @throws UnsupportedCriterionException 
 	 */
 	public void updateGraph(Criteria criterion) throws UnsupportedCriterionException{
-		
+
 		if(!hasData){
 			LOG.error("No users nor ratings registered in the database. Skipping this method.");
 			return;
 		}
-			
-		
-		HashMap<Double, Integer> consolidatedRatings = new HashMap<Double, Integer>();
 
-		HashMap<Double, List<UserRating>> userRatings;
+
+		HashMap<String, Integer> consolidatedRatings = new HashMap<String, Integer>();
+
+		HashMap<String, List<UserRating>> userRatings;
 		switch (criterion) {
 		case safety:
 			userRatings = usersSafetyRatings;
@@ -399,7 +411,7 @@ public class GraphIntegrator {
 			throw new UnsupportedCriterionException(criterion);
 		}
 
-		for(double streetEdgeId : userRatings.keySet()){
+		for(String streetEdgeId : userRatings.keySet()){
 			int overallRating = (int) computeOverallRating(userRatings.get(streetEdgeId), criterion);
 			consolidatedRatings.put(streetEdgeId, overallRating);
 

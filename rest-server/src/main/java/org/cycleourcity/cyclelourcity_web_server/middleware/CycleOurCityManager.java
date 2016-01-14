@@ -3,14 +3,23 @@ package org.cycleourcity.cyclelourcity_web_server.middleware;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
+
+import org.cycleourcity.cyclelourcity_web_server.resources.elements.planner.RoutePlanRequest;
+import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.GeometryRating;
 import org.cycleourcity.driver.AccountManagementDriver;
 import org.cycleourcity.driver.StreetEdgeManagementDriver;
+import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
 import org.cycleourcity.driver.impl.AccountManagementDriverImpl;
 import org.cycleourcity.driver.impl.StreetEdgeManagementDriverImpl;
+import org.cycleourcity.otp.OTPGraphManager;
+import org.cycleourcity.otp.planner.RoutePlanner;
+import org.cycleourcity.otp.planner.exceptions.InvalidPreferenceSetException;
+import org.cycleourcity.otp.planner.preferences.UserPreferences;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -18,14 +27,21 @@ import com.google.gson.JsonObject;
 
 public class CycleOurCityManager {
 
-	private final StreetEdgeManagementDriver 		STREET_MANAGER;
-	private final AccountManagementDriver	 	ACCOUNT_MANAGER;
+	private final OTPGraphManager				otpManager;
+	private final AccountManagementDriver		accountManager;
+	private final StreetEdgeManagementDriver	streetEdgeManager;
 	
+	
+	private static CycleOurCityManager MANAGER = new CycleOurCityManager();
 	
 	private CycleOurCityManager(){
-		this.ACCOUNT_MANAGER= AccountManagementDriverImpl.getManager();
-		this.STREET_MANAGER	= StreetEdgeManagementDriverImpl.getManager();
-		
+		this.otpManager			= new OTPGraphManager(true, "/var/otp");
+		this.accountManager		= AccountManagementDriverImpl.getManager();
+		this.streetEdgeManager	= StreetEdgeManagementDriverImpl.getManager();
+	}
+	
+	public static CycleOurCityManager getInstance(){
+		return MANAGER;
 	}
 	
 	/*
@@ -36,46 +52,23 @@ public class CycleOurCityManager {
 	 ********************************************************
 	 */
 	
-	//@StreetEdgesRatings.php
-	public JsonObject getStreetEdgesRating(){
+	//@StreetEdgesRatings.php a) Safety
+	public List<GeometryRating> getSafetyRatedGeometries() 
+			throws OperationNotSupportedException{
 		
-		JsonObject streetEdgesRatings = new JsonObject();
+		throw new OperationNotSupportedException();
+	}
+
+	//@StreetEdgesRatings.php a) Elevation
+	public List<GeometryRating> getElevationRatedGeometries() 
+			throws OperationNotSupportedException{
 		
-		List<SimplifiedStreetEdge> elevationEdges 	= STREET_MANAGER.getStreetEdgesWithElevation();
-		List<SimplifiedStreetEdge> safetyEdges		= STREET_MANAGER.getStreetEdgesWithSafety();
-		
-		JsonArray elevationEdgesAsJson = new JsonArray();
-		JsonArray safetyEdgesAsJson = new JsonArray();
-		
-		for(SimplifiedStreetEdge e : elevationEdges)
-			elevationEdgesAsJson.add(e.toString());
-		
-		for(SimplifiedStreetEdge e : safetyEdges)
-			safetyEdgesAsJson.add(e.toString());
-		
-		streetEdgesRatings.add("safetyRatings", safetyEdgesAsJson);
-		streetEdgesRatings.add("elevationRatings", elevationEdgesAsJson);
-		
-		return streetEdgesRatings;
+		throw new OperationNotSupportedException();
 	}
 	
 	//@RatedStreetEdges.php
-	public JsonObject getRatedStreetEdges(){
-		JsonObject ratedStreetEdges = new JsonObject();
-		
-		JsonArray geometriesAsJson = new JsonArray();
-		List<String> geometries = STREET_MANAGER.getAllDistinctGeometries();
-		
-		JsonObject tmp;
-		for(String s : geometries){
-			tmp = new JsonObject();
-			tmp.addProperty("Geometry", s);
-			geometriesAsJson.add(tmp);
-		}
-		
-		ratedStreetEdges.add("ratedStreetEdges", geometriesAsJson);
-		
-		return ratedStreetEdges;
+	public List<String> getRatedStreetEdgesGeometries(){
+		return streetEdgeManager.getAllDistinctGeometries();
 	}
 	
 	
@@ -92,39 +85,18 @@ public class CycleOurCityManager {
 	 */
 	
 	//@InsertUserFeedback.php
-	public JsonObject classifyStreetEdge(JsonObject request, boolean last){
+	public boolean classifyStreetEdge(int userId, int tripId,
+			String streetEdgeId,
+			int safety, int elevation, int pavement, int rails,
+			boolean last) throws UnknowStreetEdgeException{
 		
-		JsonObject response = new JsonObject();
 		
-		long userId 	= request.get("userId").getAsLong();
-		long tripId 	= request.get("tripId").getAsLong();
-		long streetId 	= request.get("streetEdgeId").getAsLong();
-		
-		int elevation 	= request.get("elevation").getAsInt();
-		int safety 		= request.get("safety").getAsInt();
-		int rails 		= request.get("rails").getAsInt();
-		int pavement 	= request.get("pavement").getAsInt();
-		
-		try {
-			
-			STREET_MANAGER.classifyStreetEdge(
+			return streetEdgeManager.classifyStreetEdge(
 					tripId,
-					streetId,
+					streetEdgeId,
 					safety,
 					elevation, pavement, rails,
 					userId, last);
-			
-			response.addProperty("success", true);
-			
-			
-		} catch (UnknowStreetEdgeException e) {
-			e.printStackTrace();
-			
-			response.addProperty("success", false);
-			response.addProperty("error", e.getMessage());
-		}
-		
-		return response;
 	}
 	
 	//@SaveTrip.php
@@ -142,18 +114,22 @@ public class CycleOurCityManager {
 		
 		for(JsonElement e : streetEdges){
 			aux = (JsonObject) e;
-			
+
+			/*
+			 * TODO: descomentar
+			 * 
 			tripEdge = new SimplifiedTripEdge(
 					aux.get("streetEdgeId").getAsLong(),
 					aux.get("geometry").getAsString(),
 					aux.get("isBicycle").getAsBoolean());
 			
 			edges.add(tripEdge);
+			*/
 		}
 			
 		
 		try {
-			STREET_MANAGER.saveTrip(userID, name, edges);
+			streetEdgeManager.saveTrip(userID, name, edges);
 		} catch (UnableToPerformOperation e1) {
 			e1.printStackTrace();
 			response.addProperty("success", false);
@@ -169,6 +145,13 @@ public class CycleOurCityManager {
 		return null;
 	}
 	
+	public RoutePlanner planRoute(RoutePlanRequest r) throws InvalidPreferenceSetException{
+		GeoLocation from= new GeoLocation(r.getFromLat(), r.getFromLon());
+		GeoLocation to	= new GeoLocation(r.getToLat(), r.getToLon());
+		UserPreferences prefs = new UserPreferences(r.getSafetyPref(), r.getElevationPref(), r.getTimePref());
+		return otpManager.planRoute(from, to, prefs);
+	}
+	
 	/*
 	 ********************************************************
 	 * C - Account Manager Functions						*
@@ -178,6 +161,9 @@ public class CycleOurCityManager {
 	 ********************************************************
 	 */
 	
+	public boolean registerUser(String username, String email, String password, String confirmPassword){
+		return false;
+	}
 	
 	/*
 	 ********************************************************

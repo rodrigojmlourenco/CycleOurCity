@@ -123,7 +123,7 @@ public class CycleOurCityBridge {
 	 * TODO: javadoc
 	 * @return
 	 */
-	public HashMap<Double, List<UserRating>> exportSafetyRatings(){		
+	public HashMap<String, List<UserRating>> exportSafetyRatings(){		
 		return manager.getAllSafetyRatings();		
 	}
 
@@ -131,7 +131,7 @@ public class CycleOurCityBridge {
 	 * TODO: javadoc
 	 * @return
 	 */
-	public HashMap<Double, List<UserRating>> exportElevationRatings(){
+	public HashMap<String, List<UserRating>> exportElevationRatings(){
 		return manager.getAllElevationRatings();	
 	}
 
@@ -139,7 +139,7 @@ public class CycleOurCityBridge {
 	 * TODO: javadoc
 	 * @return
 	 */
-	public HashMap<Double, List<UserRating>> exportPaveRatings(){
+	public HashMap<String, List<UserRating>> exportPaveRatings(){
 		return manager.getAllPavementRatings();	
 	}
 
@@ -147,7 +147,7 @@ public class CycleOurCityBridge {
 	 * TODO: javadoc
 	 * @return
 	 */
-	public HashMap<Double, List<UserRating>> exportRailsRatings(){
+	public HashMap<String, List<UserRating>> exportRailsRatings(){
 		return manager.getAllRailsRatings();
 	}
 
@@ -206,19 +206,19 @@ public class CycleOurCityBridge {
 	/////////////////////////////////////////////////////////////
 
 
-	public void insertConsolidadedElevationRatings(HashMap<Double, Integer> consolidatedElevationRatings){
+	public void insertConsolidadedElevationRatings(HashMap<String, Integer> consolidatedElevationRatings){
 		manager.updateConsolidatedElevationRatings(consolidatedElevationRatings);
 	}
 
-	public void insertConsolidadedSafetyRatings(HashMap<Double, Integer> consolidatedSafetyRatings){
+	public void insertConsolidadedSafetyRatings(HashMap<String, Integer> consolidatedSafetyRatings){
 		manager.updateConsolidatedSafetyRatings(consolidatedSafetyRatings);
 	}
 
-	public void insertConsolidadedPaveRatings(HashMap<Double, Integer> consolidatedPaveRatings){
+	public void insertConsolidadedPaveRatings(HashMap<String, Integer> consolidatedPaveRatings){
 		manager.updateConsolidatedPavementRatings(consolidatedPaveRatings);
 	}
 
-	public void insertConsolidadedRailsRatings(HashMap<Double, Integer> consolidatedRailsRatings){
+	public void insertConsolidadedRailsRatings(HashMap<String, Integer> consolidatedRailsRatings){
 		manager.updateConsolidatedRailsRatings(consolidatedRailsRatings);
 	}
 }

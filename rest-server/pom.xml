@@ -23,6 +23,10 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-grizzly2-http</artifactId>
 		</dependency>
@@ -45,11 +49,6 @@
 			<version>0.19</version> <scope>system</scope> <systemPath>${project.basedir}/src/main/resources/otp-0.19.0-shaded.jar</systemPath> 
 			</dependency> -->
 		<dependency>
-			<groupId>org.opentripplanner</groupId>
-			<artifactId>OTP</artifactId>
-			<version>0.20.0-CYCLEOURCITY</version>
-		</dependency>
-		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
@@ -64,6 +63,16 @@
 			<groupId>org.cycleourcity</groupId>
 			<artifactId>driver</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.cycleourcity</groupId>
+			<artifactId>coc-otp</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.5</version>
 		</dependency>
 	</dependencies>
 

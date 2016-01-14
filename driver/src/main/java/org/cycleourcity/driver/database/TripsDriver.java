@@ -28,7 +28,7 @@ public interface TripsDriver {
 	 * @return True if the operation was successful, false otherwise.
 	 * @throws SQLException 
 	 */
-	public boolean insertTripStreetEdge(long tripID, double streetEdgeID, boolean bicycle) throws SQLException;
+	public boolean insertTripStreetEdge(long tripID, String streetEdgeID, boolean bicycle) throws SQLException;
 	
 	
 	/**
@@ -61,7 +61,7 @@ public interface TripsDriver {
 	 * @return True if the operation was successful, false otherwise.
 	 * @throws SQLException 
 	 */
-	public boolean deleteTripStreetEdge(long tripID, double streetEdgeID) throws SQLException;
+	public boolean deleteTripStreetEdge(long tripID, String streetEdgeID) throws SQLException;
 
 	/**
 	 * Fetches a list of a specific user's trips.
@@ -105,5 +105,5 @@ public interface TripsDriver {
 	 * 
 	 * @throws SQLException
 	 */
-	public boolean tripContainStreetEdge(long tripID, double streetEdgeID) throws SQLException;
+	public boolean tripContainStreetEdge(long tripID, String streetEdgeID) throws SQLException;
 }

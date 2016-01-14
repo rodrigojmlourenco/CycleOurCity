@@ -1,19 +1,20 @@
 package org.cycleourcity.driver.database.structures;
 
 public class StreetEdgeWithRating {
-	private double streetEdgeId;
+	
+	private String streetEdgeId;
 	private long lastRating;
 	
-	public StreetEdgeWithRating(double streetEdgeId, Long lastRating){
+	public StreetEdgeWithRating(String streetEdgeId, Long lastRating){
 		this.streetEdgeId = streetEdgeId;
 		this.lastRating = lastRating;
 	}
 
-	public double getStreetEdgeId() {
+	public String getStreetEdgeId() {
 		return streetEdgeId;
 	}
 	
-	public double getUserId(){
+	public String getUserId(){
 		return streetEdgeId;
 	}
 

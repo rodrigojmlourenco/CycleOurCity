@@ -4,18 +4,18 @@ import java.util.List;
 
 public class StreetEdgeStatistics {
 
-	private double id;
+	private String id;
 	private double average;
 	private double standardDeviation;
 	
-	public StreetEdgeStatistics(double id, List<UserRating> ratings){
+	public StreetEdgeStatistics(String id, List<UserRating> ratings){
 		this.id = id;
 		
 		average = computeAverage(ratings);
 		standardDeviation = computeStandardDeviation(ratings, average);
 	}
 	
-	public double getId(){ return this.id; }
+	public String getId(){ return this.id; }
 	
 	public double getAverageRating() { return average; }
 	

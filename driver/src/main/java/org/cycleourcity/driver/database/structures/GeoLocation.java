@@ -2,8 +2,10 @@ package org.cycleourcity.driver.database.structures;
 
 public class GeoLocation {
 	
-	private final double latitude;
-	private final double longitude;
+	private double latitude;
+	private double longitude;
+	
+	public GeoLocation(){}
 	
 	public GeoLocation(double d, double e){
 		this.latitude  = d;
@@ -13,6 +15,14 @@ public class GeoLocation {
 	public double getLatitude(){ return this.latitude; }
 	
 	public double getLongitude(){ return this.longitude; }
+	
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
 
 	@Override
 	public String toString() {
@@ -27,5 +37,6 @@ public class GeoLocation {
 		return latitude == aux.getLatitude() && longitude == aux.getLongitude();
 		
 	}
+	
 	
 }

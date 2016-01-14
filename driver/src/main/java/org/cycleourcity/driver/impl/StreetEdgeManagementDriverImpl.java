@@ -129,7 +129,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public boolean classifyStreetEdge(long tripID, long streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) 
+	public boolean classifyStreetEdge(long tripID, String streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) 
 			throws UnknowStreetEdgeException {
 
 		try {
@@ -248,7 +248,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public HashMap<Double, List<UserRating>> getAllSafetyRatings() {
+	public HashMap<String, List<UserRating>> getAllSafetyRatings() {
 		try {
 			return streetEdgesDriver.getAllSafetyRatings();
 		} catch (SQLException e) {
@@ -258,7 +258,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public HashMap<Double, List<UserRating>> getAllPavementRatings() {
+	public HashMap<String, List<UserRating>> getAllPavementRatings() {
 		try {
 			return streetEdgesDriver.getAllPavementRatings();
 		} catch (SQLException e) {
@@ -268,7 +268,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public HashMap<Double, List<UserRating>> getAllRailsRatings() {
+	public HashMap<String, List<UserRating>> getAllRailsRatings() {
 		try {
 			return streetEdgesDriver.getAllRailsRatings();
 		} catch (SQLException e) {
@@ -278,7 +278,7 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public HashMap<Double, List<UserRating>> getAllElevationRatings() {
+	public HashMap<String, List<UserRating>> getAllElevationRatings() {
 		try {
 			return streetEdgesDriver.getAllElevationRatings();
 		} catch (SQLException e) {
@@ -357,11 +357,11 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 
 
 	@Override
-	public boolean updateConsolidatedElevationRatings(HashMap<Double, Integer> ratings) {
+	public boolean updateConsolidatedElevationRatings(HashMap<String, Integer> ratings) {
 
 		boolean success = true;
 
-		for(double key: ratings.keySet())
+		for(String key: ratings.keySet())
 			try {
 				streetEdgesDriver.updateConsolidatedElevationRating(key, ratings.get(key));
 			} catch (SQLException e) {
@@ -373,10 +373,10 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public boolean updateConsolidatedSafetyRatings(HashMap<Double, Integer> ratings) {
+	public boolean updateConsolidatedSafetyRatings(HashMap<String, Integer> ratings) {
 		boolean success = true;
 
-		for(double key: ratings.keySet())
+		for(String key: ratings.keySet())
 			try {
 				streetEdgesDriver.updateConsolidatedSafetyRating(key, ratings.get(key));
 			} catch (SQLException e) {
@@ -388,11 +388,11 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public boolean updateConsolidatedPavementRatings(HashMap<Double, Integer> ratings) {
+	public boolean updateConsolidatedPavementRatings(HashMap<String, Integer> ratings) {
 		
 		boolean success = true;
 
-		for(double key: ratings.keySet())
+		for(String key: ratings.keySet())
 			try {
 				streetEdgesDriver.updateConsolidatedPavementRating(key, ratings.get(key));
 			} catch (SQLException e) {
@@ -404,11 +404,11 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 	}
 
 	@Override
-	public boolean updateConsolidatedRailsRatings(HashMap<Double, Integer> ratings) {
+	public boolean updateConsolidatedRailsRatings(HashMap<String, Integer> ratings) {
 		
 		boolean success = true;
 
-		for(double key: ratings.keySet())
+		for(String key: ratings.keySet())
 			try {
 				streetEdgesDriver.updateConsolidatedRailsRating(key, ratings.get(key));
 			} catch (SQLException e) {

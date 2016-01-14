@@ -102,7 +102,7 @@ public interface StreetEdgeManagementDriver {
 	 * 
 	 * @throws UnknowStreetEdgeException 
 	 */
-	public boolean classifyStreetEdge(long tripID, long streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) throws UnknowStreetEdgeException;
+	public boolean classifyStreetEdge(long tripID, String streetEdgeID, int safety, int elevation, int pavement, int rails, long userID, boolean last) throws UnknowStreetEdgeException;
 
 
 	/**
@@ -161,13 +161,13 @@ public interface StreetEdgeManagementDriver {
 
 	public double[] getAllRailsFactors();
 
-	public HashMap<Double, List<UserRating>> getAllSafetyRatings();
+	public HashMap<String, List<UserRating>> getAllSafetyRatings();
 
-	public HashMap<Double, List<UserRating>> getAllPavementRatings();
+	public HashMap<String, List<UserRating>> getAllPavementRatings();
 
-	public HashMap<Double, List<UserRating>> getAllRailsRatings();
+	public HashMap<String, List<UserRating>> getAllRailsRatings();
 
-	public HashMap<Double, List<UserRating>> getAllElevationRatings();
+	public HashMap<String, List<UserRating>> getAllElevationRatings();
 
 	//TODO: daqui para baixo nao está nada implementado
 	//BACK-END
@@ -177,11 +177,11 @@ public interface StreetEdgeManagementDriver {
 
 	public void populateStreetEdges(List<CustomStreetEdge> streetEdges);
 
-	public boolean updateConsolidatedElevationRatings(HashMap<Double, Integer> ratings);
+	public boolean updateConsolidatedElevationRatings(HashMap<String, Integer> ratings);
 
-	public boolean updateConsolidatedSafetyRatings(HashMap<Double, Integer> ratings);
+	public boolean updateConsolidatedSafetyRatings(HashMap<String, Integer> ratings);
 
-	public boolean updateConsolidatedPavementRatings(HashMap<Double, Integer> ratings);
+	public boolean updateConsolidatedPavementRatings(HashMap<String, Integer> ratings);
 
-	public boolean updateConsolidatedRailsRatings(HashMap<Double, Integer> ratings);
+	public boolean updateConsolidatedRailsRatings(HashMap<String, Integer> ratings);
 }

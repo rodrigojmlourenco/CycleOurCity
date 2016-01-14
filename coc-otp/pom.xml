@@ -191,13 +191,7 @@
         <dependency>
         	<groupId>org.opentripplanner</groupId>
         	<artifactId>otp</artifactId>
-        	<version>0.20.0-SNAPSHOT</version>
-        	<type>pom.lastUpdated</type>
-        </dependency>
-        <dependency>
-        	<groupId>org.cycleourcity</groupId>
-        	<artifactId>otp</artifactId>
-        	<version>0.20.0-SNAPSHOT</version>
+        	<version>0.20.0-CYCLEOURCITY</version>
         </dependency>
 	</dependencies>
 	<build>
