@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 @Path("/rate")
 public class RateStreetsResource {
 	
-	private final static Logger LOG = LoggerFactory.getLogger(RatedStreetsResponse.class);
+	private final static Logger LOG = LoggerFactory.getLogger(RateStreetsResource.class);
 	
 	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
 
@@ -48,17 +48,20 @@ public class RateStreetsResource {
 	
 	/**
 	 * TODO: this method will fail as the db does not support geometries
-	 * 
+	 * <b>NOTE: </b>After some static code analysis it was determined that
+	 * this function is never called.
+	 * <br>
 	 * <b>RatedStreetEdges.php</b>
 	 * <br>
 	 * Fetches all the geometries of all street edges.
 	 * <br>
 	 * <b>WHY? - what is the purpose of this function</b>
-
+	 * 
 	 * @return
 	 */
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	//@GET
+	@Deprecated
+	//@Produces(MediaType.APPLICATION_JSON)
 	public RatedStreetsResponse getRatedStreets(){
 		
 		LOG.info("Fetching the geometries of all rated streets.");
@@ -71,12 +74,17 @@ public class RateStreetsResource {
 		return new RatedStreetsResponse(geometries);
 	}
 	
-	@Path("/geometries")
-	@Produces(MediaType.APPLICATION_JSON)
+	/**
+	 * <b>NOTE: </b>After some static code analysis it was determined that
+	 * this function is never called.
+	 * @return
+	 */
+	@Deprecated
+	//@Path("/geometries")
+	//@Produces(MediaType.APPLICATION_JSON)
 	public RatedGeometriesResponse getRatedGeometries(){
 		
 		GeometryRating[] safeties, elevations;
-		
 		
 		try {
 			List<GeometryRating> safetyList = manager.getSafetyRatedGeometries();
@@ -94,9 +102,6 @@ public class RateStreetsResource {
 			e.printStackTrace();
 			return null;
 		}
-		
-		
-		
 	}
 	
 	/**

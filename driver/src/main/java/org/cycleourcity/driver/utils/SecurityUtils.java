@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
 
+import org.apache.commons.codec.binary.Hex;
 import org.joda.time.DateTime;
 
 public class SecurityUtils {
@@ -42,7 +43,7 @@ public class SecurityUtils {
 	public static String generateSecureActivationToken(int size) throws UnsupportedEncodingException{
 		byte[] token = new byte[size];
 		r.nextBytes(token);
-		return new String(token, "UTF-8");
+		return Hex.encodeHexString(token);
 	}
 	
 	public static byte[] hashSHA1(String s) throws NoSuchAlgorithmException{

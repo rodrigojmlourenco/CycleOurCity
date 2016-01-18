@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
 import org.cycleourcity.otp.coc.GraphIntegrator;
 import org.cycleourcity.otp.coc.exceptions.RepeatedIdsException;
+import org.cycleourcity.otp.exceptions.EmptyMapException;
 import org.cycleourcity.otp.graph.exceptions.UnableToSerializeGraph;
 import org.cycleourcity.otp.planner.exceptions.UnsupportedCriterionException;
 import org.opentripplanner.graph_builder.GraphBuilder;
@@ -55,6 +56,9 @@ public class GraphManager
 			throw new UnableToSerializeGraph(e.getMessage());
 		} catch (RepeatedIdsException e) {
 			throw new UnableToSerializeGraph(e.getMessage());
+		} catch (EmptyMapException e) {
+			e.printStackTrace();
+			throw new UnableToSerializeGraph(e.getMessage());
 		}
 	}
 
@@ -74,7 +78,8 @@ public class GraphManager
 				buildGraphFromScratch(new File(baseDir));
 				
 			}
-		}
+		}else
+			buildGraphFromScratch(new File(baseDir));
 		
 		updateGraphIntegrator();
 	}
@@ -111,6 +116,9 @@ public class GraphManager
 		} catch (UnsupportedCriterionException e) {
 			throw new UnableToSerializeGraph(e.getMessage());
 		} catch (RepeatedIdsException e) {
+			throw new UnableToSerializeGraph(e.getMessage());
+		} catch (EmptyMapException e) {
+			e.printStackTrace();
 			throw new UnableToSerializeGraph(e.getMessage());
 		}
 	}

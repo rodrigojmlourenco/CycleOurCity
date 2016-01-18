@@ -10,10 +10,13 @@ import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.Geome
 import org.cycleourcity.driver.AccountManagementDriver;
 import org.cycleourcity.driver.StreetEdgeManagementDriver;
 import org.cycleourcity.driver.database.structures.GeoLocation;
-import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
+import org.cycleourcity.driver.exceptions.ExpiredTokenException;
+import org.cycleourcity.driver.exceptions.NonMatchingPasswordsException;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
+import org.cycleourcity.driver.exceptions.UnableToRegisterUserException;
 import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
+import org.cycleourcity.driver.exceptions.UserRegistryException;
 import org.cycleourcity.driver.impl.AccountManagementDriverImpl;
 import org.cycleourcity.driver.impl.StreetEdgeManagementDriverImpl;
 import org.cycleourcity.otp.OTPGraphManager;
@@ -161,8 +164,20 @@ public class CycleOurCityManager {
 	 ********************************************************
 	 */
 	
-	public boolean registerUser(String username, String email, String password, String confirmPassword){
-		return false;
+	public String registerUser(String username, String email, String password, String confirmPassword) 
+			throws 	UserRegistryException,
+					NonMatchingPasswordsException,
+					UnableToRegisterUserException,
+					UnableToPerformOperation{
+		
+		return accountManager.registerUser(username, email, password, confirmPassword);
+		
+	}
+	
+	public boolean activateUser(String token) 
+			throws ExpiredTokenException, UnableToPerformOperation{
+		
+		return accountManager.activateAccount(token);
 	}
 	
 	/*
@@ -172,4 +187,10 @@ public class CycleOurCityManager {
 	 * These functions enable the authentication of users	*
 	 ********************************************************
 	 */
+	
+	public static void main(String[] args){
+		
+		CycleOurCityManager man = CycleOurCityManager.getInstance();
+		
+	}
 }

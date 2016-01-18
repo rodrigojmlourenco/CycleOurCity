@@ -14,6 +14,7 @@ import org.cycleourcity.driver.impl.AccountManagementDriverImpl;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
 import org.cycleourcity.otp.coc.exceptions.RepeatedIdsException;
 import org.cycleourcity.otp.data.UserStats;
+import org.cycleourcity.otp.exceptions.EmptyMapException;
 import org.cycleourcity.otp.planner.exceptions.UnsupportedCriterionException;
 import org.cycleourcity.otp.utils.SafetyUtils;
 import org.cycleourcity.otp.utils.SlopeUtils;
@@ -74,7 +75,7 @@ public class GraphIntegrator {
 	private AccountManagementDriver accManager 	= AccountManagementDriverImpl.getManager();
 	//private StreetEdgeManagementDriver streetManager 	= StreetEdgeManagementDriverImpl.getManager(); 
 
-	public GraphIntegrator(Graph graph) throws RepeatedIdsException{
+	public GraphIntegrator(Graph graph) throws RepeatedIdsException, EmptyMapException{
 
 		_graph = graph;
 		_exportRatings = new CycleOurCityBridge(graph);
@@ -86,7 +87,7 @@ public class GraphIntegrator {
 		update();
 	}
 
-	public void update(){
+	public void update() throws EmptyMapException{
 
 		// Step 0 - allocate all support structures
 		safetyStats = new HashMap<>();
@@ -115,11 +116,12 @@ public class GraphIntegrator {
 			}
 
 			// Step 2 - Compute the rating's statistics of each street edge
-			for(String id : usersSafetyRatings.keySet())
-				safetyStats.put(id, new StreetEdgeStatistics(id, usersSafetyRatings.get(id)));
-
-			for(String id : usersElevationRatings.keySet())
-				elevationStats.put(id, new StreetEdgeStatistics(id, usersElevationRatings.get(id)));
+			if(usersSafetyRatings != null)
+				for(String id : usersSafetyRatings.keySet())
+					safetyStats.put(id, new StreetEdgeStatistics(id, usersSafetyRatings.get(id)));
+			if(usersElevationRatings != null)
+				for(String id : usersElevationRatings.keySet())
+					elevationStats.put(id, new StreetEdgeStatistics(id, usersElevationRatings.get(id)));
 
 			// Step 3 - Compute the reputation of each user
 			for(Long userId : users)
@@ -138,8 +140,9 @@ public class GraphIntegrator {
 	 * off all users. 
 	 * 
 	 * @param userId A long that uniquely identifies a specific user.
+	 * @throws EmptyMapException 
 	 */
-	private void computeReputation(long userId){	
+	private void computeReputation(long userId) throws EmptyMapException{	
 
 		double safetyReputation, elevationReputation;
 
@@ -170,12 +173,16 @@ public class GraphIntegrator {
 	 * @param y Reputation Factor (?) UNKNOWN - this is a percentage
 	 *  
 	 * @return The user's reputation
+	 * @throws EmptyMapException 
 	 */
 	private double consolidateSimilarityMeasureOfRatings(
 			List<StreetEdgeWithRating> streetEdgeRatings,
 			HashMap<String, StreetEdgeStatistics> stats,
-			double reputationFactor){
+			double reputationFactor) throws EmptyMapException{
 
+		if(streetEdgeRatings == null)
+			throw new EmptyMapException();
+		
 		int n = streetEdgeRatings.size();
 
 		if(n == 0) return 0;

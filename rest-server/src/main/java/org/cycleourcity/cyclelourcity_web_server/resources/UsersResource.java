@@ -4,16 +4,36 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.cycleourcity.cyclelourcity_web_server.middleware.CycleOurCityManager;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.Response;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.user.UserRegistryRequest;
+import org.cycleourcity.cyclelourcity_web_server.resources.elements.user.UserRegistryResponse;
+import org.cycleourcity.driver.exceptions.ExpiredTokenException;
+import org.cycleourcity.driver.exceptions.NonMatchingPasswordsException;
+import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
+import org.cycleourcity.driver.exceptions.UnableToRegisterUserException;
+import org.cycleourcity.driver.exceptions.UserRegistryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 @Path("/users")
 public class UsersResource {
 
+	private final String NAME = UsersResource.class.getSimpleName();
+	
+	private final static Logger LOG = LoggerFactory.getLogger(UsersResource.class);
 	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
+	
+	@Path("/test")
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public String test(){
+		return NAME;
+	}
 	
 	/**
 	 * <b>Login.php</b>
@@ -36,6 +56,13 @@ public class UsersResource {
 	public Response logout(){
 		return new Response(500, "Method not implemented yet!");
 	}
+
+	@Path("/test/register")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public UserRegistryRequest testRegisterStructrure(){
+		return new UserRegistryRequest("bonobo", "bob@somemail.org", "passWord12345!", "passWord12345!");
+	}
 	
 	/**
 	 * <b>Register.php & RegisterUser.php</b>
@@ -44,17 +71,33 @@ public class UsersResource {
 	@Path("/register")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response register(UserRegistryRequest r){
+	public UserRegistryResponse register(UserRegistryRequest r){
 		
-		boolean success;
+		String token, errorMsg;
 		
-		success = manager.registerUser(
-				r.getUsername(),
-				r.getEmail(),
-				r.getPassword(),
-				r.getConfirmPassword());
-		
-		return new Response(500, "Method not implemented yet!");
+		try {
+			token = manager.registerUser(
+					r.getUsername(),
+					r.getEmail(),
+					r.getPassword(),
+					r.getConfirmPassword());
+			
+			return new UserRegistryResponse(token, "success");
+			
+		} catch (UserRegistryException e) {
+			errorMsg = e.getMessage();
+			LOG.error(errorMsg);
+		} catch (NonMatchingPasswordsException e) {
+			errorMsg = e.getMessage();
+			LOG.error(errorMsg);
+		} catch (UnableToRegisterUserException e) {
+			errorMsg = e.getMessage();
+			LOG.error(errorMsg);
+		} catch (UnableToPerformOperation e) {
+			errorMsg = e.getMessage();
+			LOG.error(errorMsg);
+		}
+		return new UserRegistryResponse("", errorMsg);
 	}
 	
 	/**
@@ -64,8 +107,22 @@ public class UsersResource {
 	@Path("/activate")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response activate(String token){
-		return new Response(500, "Method not implemented yet!");
+	public Response activate(@QueryParam("token")String token){
+		
+		Response response;
+		String error;
+		try {
+			manager.activateUser(token);
+			return new Response(200, "success");
+		} catch (ExpiredTokenException e) {
+			LOG.error(e.getMessage());
+			error = e.getMessage();
+		} catch (UnableToPerformOperation e) {
+			LOG.error(e.getMessage());
+			error = e.getMessage();
+		}
+		
+		return new Response(500, error);
 	}
 	
 	/**

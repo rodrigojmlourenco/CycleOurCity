@@ -1,5 +1,6 @@
 package org.cycleourcity.driver.database.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -177,32 +178,40 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	//Getters
 	public int getUserIDfromUsername(String username) throws SQLException{
 
+		int result;
 		PreparedStatement statement =
 				conn.prepareStatement("SELECT Id FROM users WHERE username = ?");
 
 		statement.setString(1, username);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next()){
-			return set.getInt(1);
+			result = set.getInt(1);
 		}else 
-			return -1;
+			result = -1;
+		
+		statement.close();
+		return result;
 	}
 
 	public int getUserIDfromEmail(String email) throws SQLException{
-
+		
+		int result;
 		PreparedStatement statement =
 				conn.prepareStatement("SELECT Id FROM users WHERE email = ?");
 
 		statement.setString(0, email);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next()){
-			return set.getInt("Id");
+			result = set.getInt("Id");
 		}else 
-			return -1;
+			result = -1;
+		
+		statement.close();
+		return result;
 	}
 
 	public List<Integer> getUserActivationRequests(long userID) throws SQLException{
@@ -215,12 +224,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setLong(0, userID);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		List<Integer> requests = new ArrayList<Integer>();
 		while(set.next())
 			requests.add(set.getInt(0));
 
+		statement.close();
 		return requests;
 	}
 
@@ -235,12 +245,13 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setLong(0, userID);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		List<Integer> requests = new ArrayList<Integer>();
 		while(set.next())
 			requests.add(set.getInt(0));
 
+		statement.close();
 		return requests;
 	}
 
@@ -254,17 +265,19 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setDate(1, new java.sql.Date((new Date()).getTime()));
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		List<Integer> requests = new ArrayList<>();
 		while(set.next())
 			requests.add(set.getInt(0));
 
+		statement.close();
 		return requests;
 	}
 
 	public long getActivationExpirationDate(int activationID) throws SQLException {
 
+		long result;
 		PreparedStatement statement =
 				conn.prepareStatement(
 						"SELECT ExpirationDate "
@@ -273,17 +286,21 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setInt(1, activationID);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next()){
-			return set.getDate("ExpirationDate").getTime();
+			result = set.getDate("ExpirationDate").getTime();
 		}else
-			return -1;
+			result = -1;
+		
+		statement.close();
+		return result;
 	}
 
 	@Override
 	public int getTokenActivationID(String token) throws SQLException, NoSuchTokenException {
-
+		
+		int result;
 		PreparedStatement statement = 
 				conn.prepareStatement(
 						"SELECT Id "
@@ -292,17 +309,22 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setString(1, token);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next())
-			return set.getInt(1);
+			result = set.getInt(1);
 		else
 			throw new NoSuchTokenException();
 
+		
+		statement.close();
+		return result;
 	}
 
 	@Override
 	public String getUserPasswordHash(long userID) throws SQLException, UnknownUserIdentifierException {
+		
+		String result;
 		PreparedStatement statement = 
 				conn.prepareStatement(
 						"SELECT Password "
@@ -311,57 +333,81 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next())
-			return set.getString(1);
+			result = set.getString(1);
 		else
 			throw new UnknownUserIdentifierException();
 
+		statement.close();
+		return result;
 	}
 
 	//Checkers
 	public boolean isUsernameRegistered(String username) throws SQLException{
 
+		boolean exists;
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT * FROM users WHERE Username=?");
 
 		statement.setString(1, username);
 		ResultSet set = statement.executeQuery();
+		exists = set.next();
 		statement.close();
 
-		return set.next();
+		return exists;
 	}
 
 
 	public boolean isEmailRegistered(String email) throws SQLException{
+
+		boolean exists;
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT * FROM users WHERE Email=?");
 
 		statement.setString(1, email);
 		ResultSet set = statement.executeQuery();
+		exists = set.next();
 		statement.close();
 
-		return set.next();
+		return exists;
 	}
 
 	@Override
 	public boolean isPendingActivation(long userID) throws SQLException{
 
+		boolean result;
 		PreparedStatement statement = 
 				conn.prepareStatement(
 						"SELECT IdUser FROM users_emails WHERE IdUser = ? AND RecoveryPassword = '0'");
 
 		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
+		result = set.next();
+		
 		statement.close();
-
-		return set.next();
+		return result;
 	}
 
+	//TODO: remove before production
+	private void printTokensForTest() throws SQLException{
+		Statement statement = conn.createStatement();
+		ResultSet set = statement.executeQuery("SELECT Token from users_emails");
+		while(set.next())
+			try {
+				System.out.println(new String(set.getString("Token").getBytes(), "UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		statement.close();
+	}
+	
 	@Override
 	public boolean isTokenExpired(String token) throws SQLException, NoSuchTokenException {
 
+		boolean result;
 		PreparedStatement statement = 
 				conn.prepareStatement(
 						"SELECT ExpirationDate FROM users_emails "
@@ -369,13 +415,19 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setString(1, token);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next()){
 			long expires = set.getDate(1).getTime();
-			return (expires - (new Date()).getTime()) <= 0;
-		}else
+			result = (expires - (new Date()).getTime()) <= 0;
+		}else{
+			printTokensForTest();
+			statement.close();
 			throw new NoSuchTokenException();
+		}
+		
+		statement.close();
+		return result;
 
 	}
 
@@ -383,17 +435,21 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 	@Override
 	public String getUserSalt(long userID) throws SQLException {
 
+		String result;
 		PreparedStatement statement = 
 				conn.prepareStatement("SELECT salt FROM users WHERE Id = ?");
 
 		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		if(set.next())
-			return set.getString(1);
+			result = set.getString(1);
 		else
-			return null;
+			result = null;
+		
+		statement.close();
+		return result;
 	}
 
 
@@ -970,7 +1026,7 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		ResultSet set = statement.executeQuery("SELECT Id FROM users");
 
 		while(set.next())
-			users.add(set.getLong(0));
+			users.add(set.getLong(1));
 
 		return users;
 	}

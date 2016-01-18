@@ -9,4 +9,9 @@ public class UsernameAlreadyRegisteredException extends UserRegistryException{
 	public UsernameAlreadyRegisteredException(String username){
 		this.message = "The username '"+username+"' is already registered.";
 	}
+	
+	@Override
+	public String getMessage() {
+		return message;
+	}
 }
