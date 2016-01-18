@@ -6,6 +6,7 @@ import java.util.List;
 import org.cycleourcity.driver.database.structures.CustomStreetEdge;
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
+import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.Trip;
@@ -53,6 +54,14 @@ public interface StreetEdgeManagementDriver {
 	 */
 	public Trip getTrip(int tripID) throws StreetEdgeNotFoundException;
 
+	/**
+	 * 
+	 * @param tripId
+	 * @return
+	 * @throws UnableToPerformOperation 
+	 */
+	public SimplifiedTrip getTripDetails(int tripId) throws UnableToPerformOperation;
+	
 	/**
 	 * Fetches all the trips belonging to a specific user.
 	 * <br>

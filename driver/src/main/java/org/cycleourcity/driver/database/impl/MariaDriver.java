@@ -20,6 +20,7 @@ import org.cycleourcity.driver.database.structures.CriteriaFactor;
 import org.cycleourcity.driver.database.structures.CustomStreetEdge;
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
+import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.UserRating;
@@ -1436,5 +1437,25 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 			
 		statement.close();
 		return results;
+	}
+
+	@Override
+	public SimplifiedTrip getTripDetails(int tripId) throws SQLException {
+		
+		SimplifiedTrip result;
+		PreparedStatement statement = conn.prepareStatement(
+				"SELECT Id, Name FROM trips WHERE Id=?");
+				
+		ResultSet set = statement.executeQuery();
+		
+		String name;
+		if(set.next()){
+			name = set.getString("Name");
+			result = new SimplifiedTrip(tripId, name);
+		}else
+			result = null;
+			
+		statement.close();
+		return result;
 	}
 }

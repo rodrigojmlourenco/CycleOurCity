@@ -11,6 +11,7 @@ import org.cycleourcity.driver.database.impl.MariaDriver;
 import org.cycleourcity.driver.database.structures.CustomStreetEdge;
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
+import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
 import org.cycleourcity.driver.database.structures.Trip;
@@ -449,6 +450,15 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 		
 		try {
 			return streetEdgesDriver.getStreetEdgesFromCoordinates(from, to);
+		} catch (SQLException e) {
+			throw new UnableToPerformOperation(e.getMessage());
+		}
+	}
+
+	@Override
+	public SimplifiedTrip getTripDetails(int tripId) throws UnableToPerformOperation {
+		try {
+			return tripsDriver.getTripDetails(tripId);
 		} catch (SQLException e) {
 			throw new UnableToPerformOperation(e.getMessage());
 		}

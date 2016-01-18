@@ -1,5 +1,7 @@
 package org.cycleourcity.cyclelourcity_web_server.resources;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -8,14 +10,24 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.cycleourcity.cyclelourcity_web_server.middleware.CycleOurCityManager;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.Response;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.trips.DetailedTripResponse;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.trips.TripRegistryRequest;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.trips.UserTripsResponse;
+import org.cycleourcity.driver.database.structures.SimplifiedTrip;
+import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
+import org.cycleourcity.driver.exceptions.UnknownUserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("/trip")
 public class TripResouce {
 
+	private static Logger LOG = LoggerFactory.getLogger(TripResouce.class);
+	
+	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
+	
 	/**
 	 * <b>UserTrips.php</b>
 	 * 
@@ -27,8 +39,30 @@ public class TripResouce {
 	@GET
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserTripsResponse getUserTrips(@QueryParam("username") String username){
-		return null;
+	public UserTripsResponse getUserTrips(@QueryParam("user") String username, @QueryParam("token") String token){
+		
+		String error;
+		SimplifiedTrip[] payload;
+		List<SimplifiedTrip> tripList;
+		
+		//TODO: verificar a validade do token de autenticacao
+		
+		try {
+			
+			tripList = manager.getUserTrips(username);
+			payload = new SimplifiedTrip[tripList.size()];
+			
+			tripList.toArray(payload);
+			
+			return new UserTripsResponse(payload);
+			
+		} catch (UnknownUserException | UnableToPerformOperation e) {
+			error = e.getMessage();
+		}
+		
+		UserTripsResponse r = new UserTripsResponse();
+		r.setError(error);
+		return r;
 	}
 	
 	/**

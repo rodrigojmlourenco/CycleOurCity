@@ -10,12 +10,14 @@ import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.Geome
 import org.cycleourcity.driver.AccountManagementDriver;
 import org.cycleourcity.driver.StreetEdgeManagementDriver;
 import org.cycleourcity.driver.database.structures.GeoLocation;
+import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 import org.cycleourcity.driver.exceptions.ExpiredTokenException;
 import org.cycleourcity.driver.exceptions.NonMatchingPasswordsException;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnableToRegisterUserException;
 import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
+import org.cycleourcity.driver.exceptions.UnknownUserException;
 import org.cycleourcity.driver.exceptions.UserRegistryException;
 import org.cycleourcity.driver.impl.AccountManagementDriverImpl;
 import org.cycleourcity.driver.impl.StreetEdgeManagementDriverImpl;
@@ -221,6 +223,29 @@ public class CycleOurCityManager {
 	 * These functions enable the authentication of users	*
 	 ********************************************************
 	 */
+	
+	/*
+	 ********************************************************
+	 * E - Trips											*
+	 ********************************************************
+	 ********************************************************
+	 */
+	public List<SimplifiedTrip> getUserTrips(String user) 
+			throws UnknownUserException, UnableToPerformOperation{
+		
+		List<SimplifiedTrip> trips = new ArrayList<>();
+		
+		int userId = accountManager.getUserID(user);
+		
+		SimplifiedTrip aux;
+		for(int id : streetEdgeManager.getUserTrips(userId)){
+			aux = streetEdgeManager.getTripDetails(id);
+			if(aux!=null) trips.add(aux);
+		}
+		
+		return trips;
+	}
+	
 	
 	public static void main(String[] args){
 		

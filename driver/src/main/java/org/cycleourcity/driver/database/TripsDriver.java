@@ -3,6 +3,7 @@ package org.cycleourcity.driver.database;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 
 public interface TripsDriver {
@@ -106,4 +107,12 @@ public interface TripsDriver {
 	 * @throws SQLException
 	 */
 	public boolean tripContainStreetEdge(long tripID, String streetEdgeID) throws SQLException;
+
+	/**
+	 * 
+	 * @param tripId
+	 * @return
+	 * @throws SQLException 
+	 */
+	public SimplifiedTrip getTripDetails(int tripId) throws SQLException;
 }
