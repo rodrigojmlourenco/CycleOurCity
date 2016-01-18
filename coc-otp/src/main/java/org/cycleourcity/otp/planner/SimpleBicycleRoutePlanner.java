@@ -35,10 +35,14 @@ public class SimpleBicycleRoutePlanner extends RoutePlanner{
 	@Override
 	public TripPlan planRoute() {
 
+		System.out.println(this.getClass().getSimpleName()+": plan route");
+		
 		GraphPathFinder pathFinder = new GraphPathFinder(getRouter());
 		List<GraphPath> paths = pathFinder.graphPathFinderEntryPoint(getRoutingRequest());
 		TripPlan plan = GraphPathToTripPlanConverter.generatePlan(paths, getRoutingRequest());
 
+		System.out.println(plan.toString());
+		
 		return plan;
 	}
 }

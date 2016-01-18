@@ -442,4 +442,15 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<String> getStreetEdgesFromGeoLocations(GeoLocation from, GeoLocation to)
+			throws UnableToPerformOperation {
+		
+		try {
+			return streetEdgesDriver.getStreetEdgesFromCoordinates(from, to);
+		} catch (SQLException e) {
+			throw new UnableToPerformOperation(e.getMessage());
+		}
+	}
 }

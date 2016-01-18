@@ -23,6 +23,12 @@ import org.cycleourcity.otp.OTPGraphManager;
 import org.cycleourcity.otp.planner.RoutePlanner;
 import org.cycleourcity.otp.planner.exceptions.InvalidPreferenceSetException;
 import org.cycleourcity.otp.planner.preferences.UserPreferences;
+import org.opentripplanner.api.model.Itinerary;
+import org.opentripplanner.api.model.Leg;
+import org.opentripplanner.api.model.TripPlan;
+import org.opentripplanner.api.model.WalkStep;
+import org.opentripplanner.routing.edgetype.StreetEdge;
+import org.opentripplanner.routing.graph.Edge;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -142,17 +148,45 @@ public class CycleOurCityManager {
 		return null;
 	}
 	
-	//@NEW
-	public JsonObject planTrip(JsonObject request){
-		
-		return null;
-	}
 	
 	public RoutePlanner planRoute(RoutePlanRequest r) throws InvalidPreferenceSetException{
 		GeoLocation from= new GeoLocation(r.getFromLat(), r.getFromLon());
 		GeoLocation to	= new GeoLocation(r.getToLat(), r.getToLon());
 		UserPreferences prefs = new UserPreferences(r.getSafetyPref(), r.getElevationPref(), r.getTimePref());
 		return otpManager.planRoute(from, to, prefs);
+	}
+	
+	public void saveTrip(TripPlan plan){
+		
+		for(Itinerary itinerary : plan.itinerary){
+		
+		String name;
+			
+			
+			name = itinerary.legs.get(0).from.name + " -> " + itinerary.legs.get(0).to.name; 
+			
+			StreetEdge tmp;
+			List<SimplifiedTripEdge> streetEdges = new ArrayList<>();
+			for(Leg l : itinerary.legs){
+				
+				List<WalkStep> steps = l.walkSteps;
+				
+				for(WalkStep s : steps){
+					for(Edge e : s.edges)
+						
+						if(e instanceof StreetEdge){
+							tmp = (StreetEdge)e;
+							streetEdges.add(new SimplifiedTripEdge(tmp.getUID(), "", true));
+						}
+				}
+			}
+			
+			try {
+				streetEdgeManager.saveTrip(9, name, streetEdges);
+			} catch (UnableToPerformOperation e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/*
@@ -191,6 +225,23 @@ public class CycleOurCityManager {
 	public static void main(String[] args){
 		
 		CycleOurCityManager man = CycleOurCityManager.getInstance();
+		
+		RoutePlanRequest req = new RoutePlanRequest(
+								38.7495721,-9.142133, //From
+								38.7423355,-9.1399701, //To
+								0.2f,0.2f,0.6f);
+		
+		TripPlan plan;
+		try {
+			RoutePlanner planner = man.planRoute(req);
+			planner.run();
+			plan = planner.getTripPlan();
+
+			//Step 2 - Save the trip and its street edges
+			man.saveTrip(plan);
+		} catch (InvalidPreferenceSetException e) {
+			e.printStackTrace();
+		}
 		
 	}
 }

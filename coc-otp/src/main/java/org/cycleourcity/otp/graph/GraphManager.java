@@ -118,8 +118,7 @@ public class GraphManager
 		} catch (RepeatedIdsException e) {
 			throw new UnableToSerializeGraph(e.getMessage());
 		} catch (EmptyMapException e) {
-			e.printStackTrace();
-			throw new UnableToSerializeGraph(e.getMessage());
+			LOG.error(e.getMessage());
 		}
 	}
 

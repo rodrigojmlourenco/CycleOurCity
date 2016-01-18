@@ -55,6 +55,18 @@ public interface StreetEdgesDriver {
 	public GeoLocation getSteetEdgeFromLocation(String streetEdgeID) throws SQLException, StreetEdgeNotFoundException;
 
 	/**
+	 * Fetches the list of street edges that are delimited by the provided GeoLocations
+	 * 
+	 * @param from Starting GeoLocation
+	 * @param to Ending GeoLocation
+	 * 
+	 * @return List of street edges' identifiers
+	 * 
+	 * @throws SQLException
+	 */
+	public List<String> getStreetEdgesFromCoordinates(GeoLocation from, GeoLocation to) throws SQLException;
+	
+	/**
 	 * Fetches a specific street edge finishing location.
 	 * 
 	 * @param steetEdgeID The street edges UID.

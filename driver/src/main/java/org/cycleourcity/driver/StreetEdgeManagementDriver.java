@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.cycleourcity.driver.database.structures.CustomStreetEdge;
+import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 import org.cycleourcity.driver.database.structures.StreetEdgeWithRating;
@@ -83,6 +84,10 @@ public interface StreetEdgeManagementDriver {
 	 * @return List of geometries.
 	 */
 	public List<String> getAllDistinctGeometries();
+	
+	
+	public List<String> getStreetEdgesFromGeoLocations(GeoLocation from, GeoLocation to) throws UnableToPerformOperation;
+	
 
 	//@InsertUserFeedback.php
 	/**

@@ -619,11 +619,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		statement.setLong(1, userID);
 		ResultSet set = statement.executeQuery();
-		statement.close();
+		
 
 		while(set.next())
 			trips.add(set.getInt(1));
 
+		statement.close();
 		return trips;
 	}
 
@@ -1408,5 +1409,32 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		statement.setInt(1, rating);
 		statement.setString(2, streetEdgeID);
 		
+	}
+
+	@Override
+	public List<String> getStreetEdgesFromCoordinates(GeoLocation from, GeoLocation to) throws SQLException {
+		List<String> results = new ArrayList<>();
+		
+		PreparedStatement statement = conn.prepareStatement(
+				"SELECT Id "+
+				"FROM streetedges "+
+				"WHERE FromVertexLatitude=? "+
+				"AND FromVertexLongitude=? "+
+				"AND ToVertexLatitude=? "+
+				"AND ToVertexLongitude=?");
+		
+		statement.setDouble(1, from.getLatitude());
+		statement.setDouble(2, from.getLongitude());
+		statement.setDouble(3, to.getLatitude());
+		statement.setDouble(4, to.getLongitude());
+		
+		ResultSet set = statement.executeQuery();
+		
+		while(set.next()){
+			results.add(set.getString("Id"));
+		}
+			
+		statement.close();
+		return results;
 	}
 }
