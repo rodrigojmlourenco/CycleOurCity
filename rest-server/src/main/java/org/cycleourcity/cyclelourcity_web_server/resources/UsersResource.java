@@ -11,6 +11,7 @@ import org.cycleourcity.cyclelourcity_web_server.middleware.CycleOurCityManager;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.Response;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.user.UserRegistryRequest;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.user.UserRegistryResponse;
+import org.cycleourcity.cyclelourcity_web_server.security.Secured;
 import org.cycleourcity.driver.exceptions.ExpiredTokenException;
 import org.cycleourcity.driver.exceptions.NonMatchingPasswordsException;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
@@ -27,42 +28,6 @@ public class UsersResource {
 	
 	private final static Logger LOG = LoggerFactory.getLogger(UsersResource.class);
 	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
-	
-	@Path("/test")
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public String test(){
-		return NAME;
-	}
-	
-	/**
-	 * <b>Login.php</b>
-	 * @return
-	 */
-	@Path("/login")
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response login(){
-		return new Response(500, "Method not implemented yet!");
-	}
-	
-	/**
-	 * <b>LogOut.php</b>
-	 * @return
-	 */
-	@Path("/logout")
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response logout(){
-		return new Response(500, "Method not implemented yet!");
-	}
-
-	@Path("/test/register")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public UserRegistryRequest testRegisterStructrure(){
-		return new UserRegistryRequest("bonobo", "bob@somemail.org", "passWord12345!", "passWord12345!");
-	}
 	
 	/**
 	 * <b>Register.php & RegisterUser.php</b>
@@ -127,13 +92,15 @@ public class UsersResource {
 	
 	/**
 	 * <b>ResetPassword.php</b>
+	 * 
+	 * Sends a password recovery token to the specified email.
+	 * 
 	 * @return
 	 */
 	@Path("/reset")
 	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response resetPassword(){
-		return new Response(500, "Method not implemented yet!");
+	public void requestPasswordChange(@QueryParam("email")String email){
+		
 	}
 	
 	/**
@@ -141,10 +108,10 @@ public class UsersResource {
 	 * 
 	 * @return
 	 */
-	@Path("/forgot")
+	@Path("/change")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response requestPassword(){
+	public Response unsecurePasswordChange(@QueryParam("token")String token){
 		return new Response(500, "Method not implemented yet!");
 	}
 	
@@ -157,8 +124,24 @@ public class UsersResource {
 	 */
 	@Path("/change")
 	@POST
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response changePassword(){
+	public Response securePasswordChange(){
 		return new Response(500, "Method not implemented yet!");
+	}
+	
+	/*
+	@Path("/test")
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public String test(){
+		return NAME;
+	}
+	*/
+	@Path("/test/register")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public UserRegistryRequest testRegisterStructrure(){
+		return new UserRegistryRequest("bonobo", "bob@somemail.org", "passWord12345!", "passWord12345!");
 	}
 }

@@ -17,6 +17,7 @@ import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.RateT
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.RatedGeometriesResponse;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.RatedStreetsResponse;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.street.StreetEdgeRating;
+import org.cycleourcity.cyclelourcity_web_server.security.Secured;
 import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ public class RateStreetsResource {
 	
 	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
 
+	/*
 	@Path("/test")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -123,6 +125,7 @@ public class RateStreetsResource {
 	 * @return
 	 */
 	@POST
+	@Secured
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response rateTrip(RateTripRequest r){

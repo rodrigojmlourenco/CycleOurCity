@@ -15,6 +15,7 @@ import org.cycleourcity.cyclelourcity_web_server.resources.elements.Response;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.trips.DetailedTripResponse;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.trips.TripRegistryRequest;
 import org.cycleourcity.cyclelourcity_web_server.resources.elements.trips.UserTripsResponse;
+import org.cycleourcity.cyclelourcity_web_server.security.Secured;
 import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnknownUserException;
@@ -33,13 +34,13 @@ public class TripResouce {
 	 * 
 	 * Fetches all the trips associated with a specific user.
 	 * 
-	 * @param username The user's username
 	 * @return UserTripsResponse
 	 */
 	@GET
+	@Secured
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserTripsResponse getUserTrips(@QueryParam("user") String username, @QueryParam("token") String token){
+	public UserTripsResponse getUserTrips(@QueryParam("user") String username){
 		
 		String error;
 		SimplifiedTrip[] payload;
@@ -71,14 +72,12 @@ public class TripResouce {
 	 * Fetches the details of a certain a certain trip, belonging to
 	 * a certain user.
 	 * 
-	 * @param username The user's username.
-	 * @param tripId The request trip
-	 * 
 	 * @return DetailedTripResponse 
 	 */
 	@GET
+	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public DetailedTripResponse getTrip(@QueryParam("username")String username, @QueryParam("tripId")int tripId){
+	public DetailedTripResponse getTrip(){
 		
 		return null;
 	}
@@ -92,6 +91,7 @@ public class TripResouce {
 	 * @return Reponse
 	 */
 	@POST
+	@Secured
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response saveTrip(TripRegistryRequest r){
 		return new Response(500, "Method not implemented yet!");

@@ -1,5 +1,7 @@
 package org.cycleourcity.cyclelourcity_web_server;
 
+import org.cycleourcity.cyclelourcity_web_server.middleware.CycleOurCityManager;
+import org.cycleourcity.cyclelourcity_web_server.middleware.CycleOurCitySecurityManager;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -30,6 +32,10 @@ public class Main {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+    	
+    	CycleOurCityManager.getInstance();
+    	CycleOurCitySecurityManager.getManager();
+    	
         final HttpServer server = startServer();
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));

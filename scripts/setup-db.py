@@ -34,7 +34,7 @@ cursor.execute(cmd2)
 # Phase 1 - User Tables
 print "Starting Phase 1 - Users' tables"
 
-users = "CREATE TABLE IF NOT EXISTS users (Id int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY, Username VARCHAR(20) NOT NULL UNIQUE, Password varchar(128) NOT NULL, Email varchar(128) NOT NULL UNIQUE, Salt varchar(64) NOT NULL, CreatedAt timestamp not null DEFAULT CURRENT_TIMESTAMP, LastVisit timestamp DEFAULT 0)"
+users = "CREATE TABLE IF NOT EXISTS users (Id int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY, Username VARCHAR(20) NOT NULL UNIQUE, Password varchar(128) NOT NULL, Email varchar(128) NOT NULL UNIQUE, Salt varchar(128) NOT NULL, CreatedAt timestamp not null DEFAULT CURRENT_TIMESTAMP, LastVisit timestamp DEFAULT 0)"
 
 users_emails = "CREATE TABLE IF NOT EXISTS users_emails (Id INT(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY, IdUser int(11) unsigned NOT NULL, FOREIGN KEY (IdUser) REFERENCES users(Id) ON DELETE CASCADE, RecoveryPassword tinyint(1) NOT NULL, Token varchar(160) NOT NULL UNIQUE, ExpirationDate timestamp NOT NULL DEFAULT 0)"
 
