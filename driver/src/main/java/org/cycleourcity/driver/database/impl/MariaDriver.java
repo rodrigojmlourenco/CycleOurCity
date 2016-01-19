@@ -703,6 +703,23 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 	/////////////////////////////////////////////////////////
 
+	public boolean insertStreetEdgeGeometry(String id, String geometry) throws SQLException{
+		
+		int success;
+		PreparedStatement statement = conn.prepareStatement(
+				"INSERT INTO geometries (IdStreetEdge, Geometry) "
+				+ "VALUES (?,?)");
+		
+		statement.setString(1, id);
+		statement.setString(2, geometry);
+		
+		success = statement.executeUpdate();
+		
+		statement.close();
+		
+		return success > 1;
+	}
+	
 	@Override
 	public boolean insertStreetEdge(String id, String name, GeoLocation from, GeoLocation to, int otpID)
 			throws SQLException {
@@ -719,9 +736,12 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 		statement.setDouble(5, to.getLatitude());
 		statement.setDouble(6, to.getLongitude());
 		statement.setInt(7, otpID);
-
+		
 		int count = statement.executeUpdate();
 		statement.close();
+		
+		
+		
 
 		return count > 0;
 	}

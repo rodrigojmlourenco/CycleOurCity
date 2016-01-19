@@ -30,6 +30,15 @@ public interface StreetEdgesDriver {
 	public boolean insertStreetEdge(String id, String name, GeoLocation from, GeoLocation to, int otpID) throws SQLException;
 
 	/**
+	 * 
+	 * @param id
+	 * @param geometry
+	 * @return
+	 * @throws SQLException
+	 */
+	public boolean insertStreetEdgeGeometry(String id, String geometry) throws SQLException;
+	
+	/**
 	 * Deletes a specific street edge entry.
 	 * 
 	 * @param streetEdgeID The street edge's UID

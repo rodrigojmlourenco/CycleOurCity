@@ -111,6 +111,12 @@ streetedges += "ToVertexLatitude double, "
 streetedges += "ToVertexLongitude double, "
 streetedges += "OTPId int(11) unsigned NOT NULL)"
 
+geometries	 = "CREATE TABLE IF NOT EXISTS geometries ("
+geometries	+= "Id int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+geometries 	+= "IdStreetEdge VARCHAR(100) not null, "
+geometries 	+=	"FOREIGN KEY(IdStreetEdge) REFERENCES streetedges(Id) ON DELETE CASCADE, "
+geometries	+= "Geometry VARCHAR(2048) NOT NULL)"
+
 streetedge_elevation  = "CREATE TABLE IF NOT EXISTS streetedge_elevation ("
 streetedge_elevation += "Id int(11) unsigned NOT NULL PRIMARY KEY, "
 streetedge_elevation += "IdStreetEdge VARCHAR(100) not null, "
@@ -181,6 +187,7 @@ trips_streetedges += "FOREIGN KEY(IdStreetEdge) REFERENCES streetedges(Id) ON DE
 trips_streetedges += "BicycleMode TINYINT(1) NOT NULL)"
 
 cursor.execute(streetedges)
+cursor.execute(geometries)
 cursor.execute(streetedge_rails)
 cursor.execute(streetedge_safety)
 cursor.execute(streetedge_pavement)

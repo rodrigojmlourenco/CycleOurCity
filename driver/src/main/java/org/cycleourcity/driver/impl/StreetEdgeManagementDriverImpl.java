@@ -219,7 +219,9 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 		String name;
 		GeoLocation from, to;
 		int otpID;
+		String geometry;
 
+		boolean success;
 		for(CustomStreetEdge se : streetEdges){
 
 			id		= se.getId();
@@ -227,10 +229,21 @@ public class StreetEdgeManagementDriverImpl implements StreetEdgeManagementDrive
 			from	= se.getFrom();
 			to		= se.getTo();
 			otpID	= se.getOTPID();
-
-
+			geometry= se.getGeometry();
+			
 			try {
-				streetEdgesDriver.insertStreetEdge(id, name, from, to, otpID);
+				
+				success = streetEdgesDriver.insertStreetEdge(
+								id,
+								name,
+								from, to,
+								otpID);
+				
+				if(success)
+					streetEdgesDriver.insertStreetEdgeGeometry(id, geometry);
+				else
+					error = true;
+				
 				i++;
 			} catch (SQLException e) {
 				error = true;

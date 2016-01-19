@@ -17,6 +17,12 @@ import org.opentripplanner.routing.graph.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
+
 /**
  * 
  */
@@ -26,17 +32,22 @@ public class CycleOurCityBridge {
 	
 	//Database driver abstraction layer
 	private StreetEdgeManagementDriver manager;
+	
+	
 
 	protected CycleOurCityBridge(Graph graph) throws RepeatedIdsException {
 		manager = StreetEdgeManagementDriverImpl.getManager();
 
 		if(manager.isEmptyMap()){ //First time execution
 			
+			Gson gson = new Gson();
+			
 			int repeated = checkForRepeatedIds(graph);
 			
 			if(repeated > 0)
 				throw new RepeatedIdsException(repeated);
 			
+			JsonObject geometry;
 			List<CustomStreetEdge> cEdges = new ArrayList<>();
 			for(StreetEdge e : graph.getStreetEdges()){
 
@@ -49,13 +60,14 @@ public class CycleOurCityBridge {
 				to = new GeoLocation(
 						e.getToVertex().getY(),
 						e.getToVertex().getX());
-
+				
 				CustomStreetEdge aux = 
 						new CustomStreetEdge(
 								e.getUID(),
 								e.getName(),
 								from, to,
-								e.getId());
+								e.getId(),
+								gson.toJson(lineStringToGeoJSON(e.getGeometry())));
 
 				cEdges.add(aux);
 			}
@@ -63,6 +75,28 @@ public class CycleOurCityBridge {
 			manager.populateStreetEdges(cEdges);
 			LOG.info(""+graph.getStreetEdges().size()+" new street edges added to the CycleOurCity database.");
 		}
+	}
+	
+	private JsonObject lineStringToGeoJSON(LineString lineString){
+		
+		JsonObject result = new JsonObject();
+		JsonArray coordinates = new JsonArray();
+
+		Coordinate[] lCoords = lineString.getCoordinates();
+		int points = lCoords.length;
+		for(int i = 0; i < points ; i++){
+			JsonArray tmp = new JsonArray();
+			tmp.add(lCoords[i].x);
+			tmp.add(lCoords[i].y);
+			
+			coordinates.add(tmp);
+		}
+		
+		
+		result.addProperty("type", lineString.getGeometryType());
+		result.add("coordinates", coordinates);
+
+		return result;
 	}
 	
 	private int checkForRepeatedIds(Graph g){
