@@ -12,6 +12,7 @@ import javax.ws.rs.client.WebTarget;
 import org.cycleourcity.driver.database.impl.MariaDriver;
 import org.cycleourcity.driver.database.structures.CriteriaFactor;
 import org.cycleourcity.driver.utils.CriteriaUtils.Criteria;
+import org.cycleourcity.server.Main;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.junit.After;
 import org.junit.Before;
