@@ -1,21 +1,32 @@
 package org.cycleourcity.server.resources.elements.trips;
 
+import java.util.List;
+
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedStreetEdge;
+import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
 
 public class DetailedTripResponse {
 
 	private GeoLocation from;
 	private GeoLocation to;
-	private SimplifiedStreetEdge[] streetEdges;
+	private SimplifiedTripEdge[] streetEdges;
 	
 	public DetailedTripResponse(){}
 	
-	public DetailedTripResponse(SimplifiedStreetEdge[] streetEdges, GeoLocation from, GeoLocation to){
+	public DetailedTripResponse(SimplifiedTripEdge[] streetEdges, GeoLocation from, GeoLocation to){
 		this.from 	= from;
 		this.to		= to;
 		
 		this.streetEdges = streetEdges;
+	}
+	
+	public DetailedTripResponse(List<SimplifiedTripEdge> streetEdges, GeoLocation from, GeoLocation to){
+		this.from 	= from;
+		this.to		= to;
+		
+		this.streetEdges = new SimplifiedTripEdge[streetEdges.size()];
+		streetEdges.toArray(this.streetEdges);
 	}
 
 	public GeoLocation getFrom() {
@@ -34,11 +45,11 @@ public class DetailedTripResponse {
 		this.to = to;
 	}
 
-	public SimplifiedStreetEdge[] getStreetEdges() {
+	public SimplifiedTripEdge[] getStreetEdges() {
 		return streetEdges;
 	}
 
-	public void setStreetEdges(SimplifiedStreetEdge[] streetEdges) {
+	public void setStreetEdges(SimplifiedTripEdge[] streetEdges) {
 		this.streetEdges = streetEdges;
 	}
 }

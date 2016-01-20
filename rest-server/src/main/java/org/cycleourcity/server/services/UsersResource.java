@@ -24,8 +24,6 @@ import org.slf4j.LoggerFactory;
 @Path("/users")
 public class UsersResource {
 
-	private final String NAME = UsersResource.class.getSimpleName();
-	
 	private final static Logger LOG = LoggerFactory.getLogger(UsersResource.class);
 	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
 	

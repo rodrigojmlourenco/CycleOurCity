@@ -10,8 +10,10 @@ import org.cycleourcity.driver.StreetEdgeManagementDriver;
 import org.cycleourcity.driver.database.structures.GeoLocation;
 import org.cycleourcity.driver.database.structures.SimplifiedTrip;
 import org.cycleourcity.driver.database.structures.SimplifiedTripEdge;
+import org.cycleourcity.driver.database.structures.Trip;
 import org.cycleourcity.driver.exceptions.ExpiredTokenException;
 import org.cycleourcity.driver.exceptions.NonMatchingPasswordsException;
+import org.cycleourcity.driver.exceptions.StreetEdgeNotFoundException;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnableToRegisterUserException;
 import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
@@ -94,7 +96,9 @@ public class CycleOurCityManager {
 	 * b) Trip Management									*
 	 ********************************************************
 	 */
-	
+	public int getUserId(String user) throws UnknownUserException, UnableToPerformOperation{
+		return accountManager.getUserID(user);
+	}
 	//@InsertUserFeedback.php
 	public boolean classifyStreetEdge(int userId, int tripId,
 			String streetEdgeId,
@@ -158,7 +162,10 @@ public class CycleOurCityManager {
 		return otpManager.planRoute(from, to, prefs);
 	}
 	
-	public void saveTrip(TripPlan plan){
+	public void saveTrip(String user, TripPlan plan) 
+			throws UnknownUserException, UnableToPerformOperation{
+		
+		int id = accountManager.getUserID(user);
 		
 		for(Itinerary itinerary : plan.itinerary){
 		
@@ -184,7 +191,7 @@ public class CycleOurCityManager {
 			}
 			
 			try {
-				streetEdgeManager.saveTrip(9, name, streetEdges);
+				streetEdgeManager.saveTrip(id, name, streetEdges);
 			} catch (UnableToPerformOperation e) {
 				e.printStackTrace();
 			}
@@ -246,6 +253,14 @@ public class CycleOurCityManager {
 		return trips;
 	}
 	
+	public Trip getTrip(int trip){
+		try {
+			return streetEdgeManager.getTrip(trip);
+		} catch (StreetEdgeNotFoundException e) {
+			return null;
+		}
+	}
+	
 	
 	public static void main(String[] args){
 		
@@ -263,7 +278,15 @@ public class CycleOurCityManager {
 			plan = planner.getTripPlan();
 
 			//Step 2 - Save the trip and its street edges
-			man.saveTrip(plan);
+			try {
+				man.saveTrip("bonobo2", plan);
+			} catch (UnknownUserException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnableToPerformOperation e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (InvalidPreferenceSetException e) {
 			e.printStackTrace();
 		}

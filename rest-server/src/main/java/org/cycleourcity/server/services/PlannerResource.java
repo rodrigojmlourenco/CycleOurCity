@@ -1,21 +1,26 @@
 package org.cycleourcity.server.services;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
+import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
+import org.cycleourcity.driver.exceptions.UnknownUserException;
 import org.cycleourcity.otp.planner.RoutePlanner;
 import org.cycleourcity.otp.planner.exceptions.InvalidPreferenceSetException;
 import org.cycleourcity.server.middleware.CycleOurCityManager;
 import org.cycleourcity.server.resources.elements.planner.RoutePlanRequest;
 import org.cycleourcity.server.resources.elements.planner.RoutePlanResponse;
+import org.cycleourcity.server.security.Secured;
+import org.opentripplanner.api.model.TripPlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.opentripplanner.api.model.TripPlan;
 /**
  * This is the end-point for requesting route planning recommendations
  * 
@@ -57,9 +62,6 @@ public class PlannerResource {
 			planner.run();
 			plan = planner.getTripPlan();
 
-			//Step 2 - Save the trip and its street edges
-			manager.saveTrip(plan);
-			
 			return new RoutePlanResponse(planner.getTripPlan(), "success");
 
 		} catch (InvalidPreferenceSetException e) {
@@ -70,5 +72,56 @@ public class PlannerResource {
 		}
 
 		return new RoutePlanResponse(null, error);
+	}
+	
+	@Path("/{user}")
+	@POST
+	@Secured
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response planRouteAndSave(
+			@PathParam("user") String user,
+			RoutePlanRequest request,
+			@Context SecurityContext context){
+		
+		TripPlan plan;
+		
+		if(!user.equals(context.getUserPrincipal().getName()))
+			return Response.status(Response.Status.UNAUTHORIZED)
+					.entity("The provided user name does not math the token's subject")
+					.build();
+		
+		try {
+
+			//Step 1 - Plan the route
+			RoutePlanner planner = manager.planRoute(request);
+			planner.run();
+			plan = planner.getTripPlan();
+
+			//Step 2 - Save the trip and its street edges
+			try {
+				manager.saveTrip(context.getUserPrincipal().getName() ,plan);
+			} catch (UnknownUserException e) {
+				LOG.error(e.getMessage());
+				return Response.status(Response.Status.UNAUTHORIZED)
+						.entity(e.getMessage())
+						.build();
+			} catch (UnableToPerformOperation e) {
+				LOG.error(e.getMessage());
+				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+						.entity(e.getMessage())
+						.build();
+			}
+			
+			return Response.ok()
+					.entity(new RoutePlanResponse(planner.getTripPlan(), "success"))
+					.build();
+
+		} catch (InvalidPreferenceSetException e) {
+			LOG.error(e.getMessage());
+			return Response.status(Response.Status.METHOD_NOT_ALLOWED)
+					.entity(e.getMessage())
+					.build();
+		} 
 	}
 }

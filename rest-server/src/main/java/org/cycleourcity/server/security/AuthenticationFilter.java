@@ -15,6 +15,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
 import org.cycleourcity.server.middleware.CycleOurCitySecurityManager;
+import org.cycleourcity.server.security.exceptions.InvalidAuthorizationTokenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,8 +101,10 @@ public class AuthenticationFilter implements ContainerRequestFilter{
 
     	// Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
-    	manager.validateToken(token);
-    	return manager.extractSubject(token);
+    	if(!manager.validateToken(token))
+    		throw new InvalidAuthorizationTokenException();
+    	
+    	return manager.validateAndExtractSubject(token);
     }
 
 }

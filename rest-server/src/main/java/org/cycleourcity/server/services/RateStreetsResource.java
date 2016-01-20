@@ -4,15 +4,18 @@ import java.util.List;
 
 import javax.naming.OperationNotSupportedException;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
+import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnknowStreetEdgeException;
+import org.cycleourcity.driver.exceptions.UnknownUserException;
 import org.cycleourcity.server.middleware.CycleOurCityManager;
-import org.cycleourcity.server.resources.elements.Response;
 import org.cycleourcity.server.resources.elements.street.GeometryRating;
 import org.cycleourcity.server.resources.elements.street.RateTripRequest;
 import org.cycleourcity.server.resources.elements.street.RatedGeometriesResponse;
@@ -75,7 +78,8 @@ public class RateStreetsResource {
 		
 		return new RatedStreetsResponse(geometries);
 	}
-	
+
+	//TODO: este problema ja foi resolvido suportamente
 	/**
 	 * <b>NOTE: </b>After some static code analysis it was determined that
 	 * this function is never called.
@@ -128,17 +132,33 @@ public class RateStreetsResource {
 	@Secured
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response rateTrip(RateTripRequest r){
-		
-		LOG.info("Classifying the streets in trip "+r.getTripId()+" from user"+r.getUserId());
-		
+	public Response rateTrip(
+			RateTripRequest r,
+			@Context SecurityContext context){
+
+		int userId;
 		int tripId = r.getTripId();
-		int userId = r.getUserId();
 		StreetEdgeRating[] ratings = r.getRatings();
 		int ratingsCount = ratings.length;
-
 		
-		String error="";
+		try {
+			userId = manager.getUserId(context.getUserPrincipal().getName());
+		} catch (UnknownUserException e1) {
+			LOG.error(e1.getMessage());
+			return Response.status(Response.Status.UNAUTHORIZED)
+					.entity(e1.getMessage())
+					.build();
+		} catch (UnableToPerformOperation e1) {
+			LOG.error(e1.getMessage());
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+					.entity(e1.getMessage())
+					.build();
+		}
+		
+		
+		LOG.info("Classifying the streets in trip "+tripId+" from user"+userId);
+		
+		
 		int failed = 0;
 		StreetEdgeRating aux;
 		boolean isLast = false;
@@ -162,14 +182,12 @@ public class RateStreetsResource {
 			} catch (UnknowStreetEdgeException e) {
 				e.printStackTrace();
 				failed++;
-				error += "\n"+e.getMessage();
 			} 
 		}
 		
-		//TODO: change this
 		if(failed>0)
-			return new Response(500, ""+failed+" streets were not classified. Reasons: "+error);	
+			return Response.ok("Success, however "+failed+" street were not classified").build();
 		else
-			return new Response(500, "Unable to handle trip "+r.getTripId()+". Method not implemented yet!");
+			return Response.ok().build();
 	}
 }

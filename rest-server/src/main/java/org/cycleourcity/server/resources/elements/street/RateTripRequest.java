@@ -6,14 +6,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RateTripRequest {
 
 	private int tripId;
-	private int userId;
 	
 	private StreetEdgeRating[] ratings;
 	
 	public RateTripRequest(){}
 	
 	public RateTripRequest(int userId, int tripId, StreetEdgeRating[] ratings){
-		this.userId = userId;
 		this.tripId = tripId;
 		
 		this.ratings = ratings;
@@ -24,12 +22,6 @@ public class RateTripRequest {
 	}
 	public void setTripId(int tripId) {
 		this.tripId = tripId;
-	}
-	public int getUserId() {
-		return userId;
-	}
-	public void setUserId(int userId) {
-		this.userId = userId;
 	}
 
 	public StreetEdgeRating[] getRatings() {

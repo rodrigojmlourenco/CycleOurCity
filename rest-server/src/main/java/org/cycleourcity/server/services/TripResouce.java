@@ -2,21 +2,20 @@ package org.cycleourcity.server.services;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.cycleourcity.driver.database.structures.SimplifiedTrip;
+import org.cycleourcity.driver.database.structures.Trip;
 import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnknownUserException;
 import org.cycleourcity.server.middleware.CycleOurCityManager;
-import org.cycleourcity.server.resources.elements.Response;
 import org.cycleourcity.server.resources.elements.trips.DetailedTripResponse;
-import org.cycleourcity.server.resources.elements.trips.TripRegistryRequest;
 import org.cycleourcity.server.resources.elements.trips.UserTripsResponse;
 import org.cycleourcity.server.security.Secured;
 import org.slf4j.Logger;
@@ -40,13 +39,13 @@ public class TripResouce {
 	@Secured
 	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserTripsResponse getUserTrips(@QueryParam("user") String username){
+	public UserTripsResponse getUserTrips(@Context SecurityContext context){
 		
 		String error;
 		SimplifiedTrip[] payload;
 		List<SimplifiedTrip> tripList;
 		
-		//TODO: verificar a validade do token de autenticacao
+		String username = context.getUserPrincipal().getName();
 		
 		try {
 			
@@ -74,26 +73,16 @@ public class TripResouce {
 	 * 
 	 * @return DetailedTripResponse 
 	 */
+	@Path("/list/{trip}")
 	@GET
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public DetailedTripResponse getTrip(){
+	public DetailedTripResponse getTrip(@PathParam("trip") int trip){
 		
-		return null;
-	}
-	
-	/**
-	 * <b>SaveTrip.php</b>
-	 * Register a new trip, which is characterized by its name and a set of street edges,
-	 * and that belongs to the specified user.
-	 * 
-	 * @param r A TripRegistryRequest that contains all the information required.
-	 * @return Reponse
-	 */
-	@POST
-	@Secured
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response saveTrip(TripRegistryRequest r){
-		return new Response(500, "Method not implemented yet!");
+		Trip details = manager.getTrip(trip);
+		
+		return new DetailedTripResponse(
+					details.getTripStreetEdges(),
+					details.getFromLocation(), details.getToLocation());
 	}
 }
