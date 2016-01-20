@@ -96,6 +96,5 @@ Additionally, it also provides some unsecure method to fetch geometries. * This 
 | Rate Trip `{server_url/streets}` |
 | --- |
 | `@Secured` |
-| This method enables users to classify the streets that belong to a certain trip. In order to do so, the request's body must contain
-a JSON encoded payload (described bellow). If successfull, the user provided criterion will be added to the backend database, and ultimately lead to better route recommendations. Finally, the user's trip will be removed (*This choice was adopted as this was performed in the original architecture*). |
-| * Payload :* `{tripId:<int>, ratings:<JSONArray[{streetEdgeId:<string>, elevationRate:<int>, safetyRate:<int>, pavementRate:<int>, railsRate:<int>}]}` |
+| This method enables users to classify the streets that belong to a certain trip. In order to do so, the request's body must contain a JSON encoded payload (described bellow). If successfull, the user provided criterion will be added to the backend database, and ultimately lead to better route recommendations. Finally, the user's trip will be removed (*This choice was adopted as this was performed in the original architecture*). |
+| *Payload :* `{tripId:<int>, ratings:<JSONArray[{streetEdgeId:<string>, elevationRate:<int>, safetyRate:<int>, pavementRate:<int>, railsRate:<int>}]}` |
