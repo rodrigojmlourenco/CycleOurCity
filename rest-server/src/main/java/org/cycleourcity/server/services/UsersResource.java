@@ -1,3 +1,14 @@
+/* This program is free software: you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public License
+ as published by the Free Software Foundation, either version 3 of
+ the License, or (at your option) any later version.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
 package org.cycleourcity.server.services;
 
 import javax.ws.rs.GET;
@@ -6,6 +17,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.cycleourcity.driver.exceptions.ExpiredTokenException;
 import org.cycleourcity.driver.exceptions.NonMatchingPasswordsException;
@@ -13,7 +25,6 @@ import org.cycleourcity.driver.exceptions.UnableToPerformOperation;
 import org.cycleourcity.driver.exceptions.UnableToRegisterUserException;
 import org.cycleourcity.driver.exceptions.UserRegistryException;
 import org.cycleourcity.server.middleware.CycleOurCityManager;
-import org.cycleourcity.server.resources.elements.Response;
 import org.cycleourcity.server.resources.elements.user.UserRegistryRequest;
 import org.cycleourcity.server.resources.elements.user.UserRegistryResponse;
 import org.cycleourcity.server.security.Secured;
@@ -34,7 +45,7 @@ public class UsersResource {
 	@Path("/register")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserRegistryResponse register(UserRegistryRequest r){
+	public Response register(UserRegistryRequest r){
 		
 		String token, errorMsg;
 		
@@ -45,7 +56,7 @@ public class UsersResource {
 					r.getPassword(),
 					r.getConfirmPassword());
 			
-			return new UserRegistryResponse(token, "success");
+			return Response.ok(new UserRegistryResponse(token)).build();
 			
 		} catch (UserRegistryException e) {
 			errorMsg = e.getMessage();
@@ -60,7 +71,7 @@ public class UsersResource {
 			errorMsg = e.getMessage();
 			LOG.error(errorMsg);
 		}
-		return new UserRegistryResponse("", errorMsg);
+		return Response.status(Response.Status.BAD_REQUEST).entity(errorMsg).build();
 	}
 	
 	/**
@@ -72,11 +83,10 @@ public class UsersResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response activate(@QueryParam("token")String token){
 		
-		Response response;
 		String error;
 		try {
 			manager.activateUser(token);
-			return new Response(200, "success");
+			return Response.ok().build();
 		} catch (ExpiredTokenException e) {
 			LOG.error(e.getMessage());
 			error = e.getMessage();
@@ -85,7 +95,7 @@ public class UsersResource {
 			error = e.getMessage();
 		}
 		
-		return new Response(500, error);
+		return Response.status(Response.Status.BAD_GATEWAY).encoding(error).build();
 	}
 	
 	/**
@@ -110,7 +120,7 @@ public class UsersResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response unsecurePasswordChange(@QueryParam("token")String token){
-		return new Response(500, "Method not implemented yet!");
+		return Response.status(Response.Status.METHOD_NOT_ALLOWED).encoding("Not implemented yet").build();
 	}
 	
 	/**
@@ -125,21 +135,6 @@ public class UsersResource {
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response securePasswordChange(){
-		return new Response(500, "Method not implemented yet!");
-	}
-	
-	/*
-	@Path("/test")
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public String test(){
-		return NAME;
-	}
-	*/
-	@Path("/test/register")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public UserRegistryRequest testRegisterStructrure(){
-		return new UserRegistryRequest("bonobo", "bob@somemail.org", "passWord12345!", "passWord12345!");
+		return Response.status(Response.Status.METHOD_NOT_ALLOWED).encoding("Not implemented yet").build();
 	}
 }
