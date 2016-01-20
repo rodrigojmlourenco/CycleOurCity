@@ -59,9 +59,11 @@ public class CycleOurCitySecurityManager {
 	}
 	
 	private CycleOurCitySecurityManager(){
+		
 		userTokens			= new ConcurrentHashMap<>();
 		authenticationTokens= new ConcurrentHashMap<>();
 		expirationDates		= new ConcurrentHashMap<>();
+		
 		try {
 			SECRET =loadSecretFromFile();
 		} catch (IOException e) {
@@ -143,7 +145,7 @@ public class CycleOurCitySecurityManager {
 		//Step 2 - Generate the token
 		expiration = new Date(System.currentTimeMillis()+TOKEN_TTL);
 		
-		jwt = createJWT(jti, user, TOKEN_ISSUER, expiration);
+		jwt = createJWT(jti, TOKEN_ISSUER, user, expiration);
 		authenticationTokens.put(jti, jwt);
 		expirationDates.put(jti, expiration);
 		userTokens.put(user, jti);
@@ -164,18 +166,16 @@ public class CycleOurCitySecurityManager {
 	 */
 	public boolean validateToken(String token) throws Exception{
 		
-		Date expiration;
-		String jti, subject, issuer;
+		String jti, subject;
 		
 		//Step 1 - Verify the signature and extract the body
 		Claims claims = Jwts.parser()         
 				.setSigningKey(DatatypeConverter.parseBase64Binary(SECRET))
 				.parseClaimsJws(token).getBody();
 		
+		
 		jti = claims.getId();
 		subject = claims.getSubject();
-		issuer	= claims.getIssuer();
-		expiration = claims.getExpiration();
 
 		//Step 2 - Validate the token
 		// a) The token is registered in memory
@@ -242,7 +242,8 @@ public class CycleOurCitySecurityManager {
 		Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
 		//Let's set the JWT Claims
-		JwtBuilder builder = Jwts.builder().setId(id)
+		JwtBuilder builder = Jwts.builder()
+				.setId(id)
 				.setIssuedAt(now)
 				.setSubject(subject)
 				.setIssuer(issuer)

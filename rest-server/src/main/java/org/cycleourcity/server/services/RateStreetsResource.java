@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.naming.OperationNotSupportedException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Rodrigo Lourenço
  *
  */
-@Path("/rate")
+@Path("/streets")
 public class RateStreetsResource {
 	
 	private final static Logger LOG = LoggerFactory.getLogger(RateStreetsResource.class);
@@ -50,9 +51,9 @@ public class RateStreetsResource {
 		
 		return new RateTripRequest(123,321, aux);
 	}
+	*/
 	
 	/**
-	 * TODO: this method will fail as the db does not support geometries
 	 * <b>NOTE: </b>After some static code analysis it was determined that
 	 * this function is never called.
 	 * <br>
@@ -64,9 +65,8 @@ public class RateStreetsResource {
 	 * 
 	 * @return
 	 */
-	//@GET
-	@Deprecated
-	//@Produces(MediaType.APPLICATION_JSON)
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
 	public RatedStreetsResponse getRatedStreets(){
 		
 		LOG.info("Fetching the geometries of all rated streets.");
@@ -79,15 +79,15 @@ public class RateStreetsResource {
 		return new RatedStreetsResponse(geometries);
 	}
 
-	//TODO: este problema ja foi resolvido suportamente
 	/**
 	 * <b>NOTE: </b>After some static code analysis it was determined that
 	 * this function is never called.
 	 * @return
 	 */
-	@Deprecated
 	//@Path("/geometries")
-	//@Produces(MediaType.APPLICATION_JSON)
+	//@GET
+	@Deprecated
+	@Produces(MediaType.APPLICATION_JSON)
 	public RatedGeometriesResponse getRatedGeometries(){
 		
 		GeometryRating[] safeties, elevations;

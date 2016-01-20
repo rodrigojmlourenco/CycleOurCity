@@ -11,7 +11,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 
 import org.cycleourcity.server.middleware.CycleOurCitySecurityManager;
@@ -42,8 +41,6 @@ public class AuthenticationFilter implements ContainerRequestFilter{
 	public void filter(ContainerRequestContext requestContext) throws IOException {
 
 		final String username;
-		
-		LOG.info("Request caught");
 		
 		// Get the HTTP Authorization header from the request
         String authorizationHeader = 
@@ -93,16 +90,18 @@ public class AuthenticationFilter implements ContainerRequestFilter{
 
         } catch (Exception e) {
             requestContext.abortWith(
-                Response.status(Response.Status.UNAUTHORIZED).build());
+                Response.status(Response.Status.UNAUTHORIZED).entity(e.getClass().getName()).build());
         }
     }
 
     private String validateToken(String token) throws Exception {
 
+    	
     	// Check if it was issued by the server and if it's not expired
         // Throw an Exception if the token is invalid
     	if(!manager.validateToken(token))
     		throw new InvalidAuthorizationTokenException();
+    	
     	
     	return manager.validateAndExtractSubject(token);
     }

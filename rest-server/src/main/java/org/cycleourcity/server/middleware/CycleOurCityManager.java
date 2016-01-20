@@ -66,10 +66,9 @@ public class CycleOurCityManager {
 	 */
 	
 	//@StreetEdgesRatings.php a) Safety
-	public List<GeometryRating> getSafetyRatedGeometries() 
-			throws OperationNotSupportedException{
+	public List<GeometryRating> getSafetyRatedGeometries(){
 		
-		throw new OperationNotSupportedException();
+		throw new UnsupportedOperationException();
 	}
 
 	//@StreetEdgesRatings.php a) Elevation
@@ -156,9 +155,11 @@ public class CycleOurCityManager {
 	
 	
 	public RoutePlanner planRoute(RoutePlanRequest r) throws InvalidPreferenceSetException{
+		
 		GeoLocation from= new GeoLocation(r.getFromLat(), r.getFromLon());
 		GeoLocation to	= new GeoLocation(r.getToLat(), r.getToLon());
 		UserPreferences prefs = new UserPreferences(r.getSafetyPref(), r.getElevationPref(), r.getTimePref());
+		
 		return otpManager.planRoute(from, to, prefs);
 	}
 	
@@ -265,7 +266,10 @@ public class CycleOurCityManager {
 	public static void main(String[] args){
 		
 		CycleOurCityManager man = CycleOurCityManager.getInstance();
+
+		List<GeometryRating> geometries = man.getSafetyRatedGeometries();
 		
+		/*
 		RoutePlanRequest req = new RoutePlanRequest(
 								38.7495721,-9.142133, //From
 								38.7423355,-9.1399701, //To
@@ -290,6 +294,6 @@ public class CycleOurCityManager {
 		} catch (InvalidPreferenceSetException e) {
 			e.printStackTrace();
 		}
-		
+		*/
 	}
 }

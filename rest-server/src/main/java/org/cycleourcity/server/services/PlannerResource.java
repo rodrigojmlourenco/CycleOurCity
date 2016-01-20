@@ -1,6 +1,7 @@
 package org.cycleourcity.server.services;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -34,7 +35,7 @@ public class PlannerResource {
 	
 	private CycleOurCityManager manager = CycleOurCityManager.getInstance();
 
-	/*
+	
 	@GET
 	@Path("/test")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -44,7 +45,7 @@ public class PlannerResource {
 				38.7423355,-9.1399701, //To
 				0.33f,0.33f,0.33f);
 	}
-	*/
+	
 
 	//TODO: este método pode ser autenticado ou nao... como proceder?
 	@POST

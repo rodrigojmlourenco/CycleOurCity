@@ -8,7 +8,7 @@ public class UserPreferences {
 	
 	public UserPreferences(float safety, float slope, float time) throws InvalidPreferenceSetException{
 		
-		if((safety + slope + time) != 1.0f) throw new InvalidPreferenceSetException();
+		if(Math.round(safety + slope + time) != 1.0f) throw new InvalidPreferenceSetException();
 		
 		this.safety = safety;
 		this.slope 	= slope;

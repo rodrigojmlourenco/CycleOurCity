@@ -1,4 +1,4 @@
-package org.cycleourcity.cyclelourcity_web_server;
+package org.cycleourcity.server;
 
 import static org.junit.Assert.assertEquals;
 

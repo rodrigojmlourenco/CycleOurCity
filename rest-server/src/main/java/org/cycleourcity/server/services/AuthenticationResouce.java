@@ -1,5 +1,6 @@
 package org.cycleourcity.server.services;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -56,9 +57,18 @@ public class AuthenticationResouce {
 	@POST
 	@Secured
 	@Produces(MediaType.APPLICATION_JSON)
-	public void logout(@Context SecurityContext securityContext){
+	public Response logout(@Context SecurityContext securityContext){
 		manager.invalidateUserToken(securityContext.getUserPrincipal().getName());
+		return Response.ok().build();
 	}
 	
+	
+	@Path("/test")
+	@GET
+	@Secured
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response test(@Context SecurityContext securityContext){
+		return Response.ok("Authorized user : "+securityContext.getUserPrincipal().getName()).build();
+	}
 	
 }

@@ -1013,9 +1013,8 @@ public class MariaDriver implements UsersDriver, TripsDriver, StreetEdgesDriver,
 
 		Statement statement = conn.createStatement();
 		ResultSet set = statement.executeQuery(
-				"SELECT DISTINCT t1.Geometry "
-						+ "FROM streetedges AS t1 INNER JOIN streetedge_elevation AS t2 "
-						+ "ON t1.Id = t2.IdStreetEdge");
+				"SELECT DISTINCT Geometry "
+						+ "FROM geometries ");
 
 		while(set.next())
 			geometries.add(set.getString(1));
