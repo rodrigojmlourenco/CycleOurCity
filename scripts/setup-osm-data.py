@@ -11,7 +11,7 @@ phase2_config = None
 bottom_left = None
 top_right = None
 for child in config:
-	if child.tag == 'phase2':
+	if child.tag == 'map':
 		phase2_config = child
 		break
 
@@ -59,12 +59,3 @@ if not os.path.exists(basedir+'/graph'):
 	os.makedirs(basedir+'/graph')
 	os.makedirs(basedir+'/graph/new')
 	os.makedirs(basedir+'/graph/old')
-
-print "\n OSM information fetched... Generating graph at "+basedir
-
-#command = "java -Xmx2G -jar ../resources/otp-0.19.0-shaded.jar --basePath ../resources --build ../resources/city"
-command = "java -Xmx2G -jar ../resources/otp-0.20.0-CYCLEOURCITY.jar --basePath "+basedir+" --build "+basedir
-os.system(command)
-
-os.rename(basedir+'/Graph.obj', basedir+'/graph/old/Graph.obj')
-

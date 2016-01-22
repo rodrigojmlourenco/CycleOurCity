@@ -1,9 +1,35 @@
-# -*- coding: utf-8 -*-
-#TODO: fazer com que estes valores possam ser adquiridos através de um ficheiro xml
 import sys
 import mysql.connector as mariadb
+import xml.etree.ElementTree as ET
 
-mariadb_connection = mariadb.connect(user='root', password='admin613SSH')
+config_path = "./config.xml"
+
+config = ET.parse(config_path).getroot()
+osm	 = ET.parse(map_path).getroot()
+
+repository 	= None
+
+#Database connection fields
+_user 		= None
+_password 	= None
+_database	= None
+
+for child in config:
+	if child.tag == 'repository':
+		repository = child;
+
+for child in repository:
+	if child.tag == 'user':
+		_user = child.attrib['val']
+	elif child.tag == 'password':
+		_password = child.attrib['val']
+	elif child.tag == 'database':
+		_database = child.attrib['val']
+	else:
+		print "Error, unknown tag "+child.tag
+		exit
+
+mariadb_connection = mariadb.connect(user=_user, password=_password)
 cursor = mariadb_connection.cursor()
 database = 'UsersClassifications'
 
@@ -22,8 +48,6 @@ cursor.execute(cleanup)
 mariadb_connection.commit()
 
 print 'Setting up all CycleOurCity databases...'
-
-
 
 
 cmd1 = "CREATE DATABASE IF NOT EXISTS "+database +" CHARACTER SET  = 'utf8' COLLATE = 'utf8_general_ci';"

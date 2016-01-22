@@ -21,6 +21,36 @@ CycleOurCity
 
 ## Running the Project for the First Time
 
+### Scripts
+
+To ease the deployment of a CycleOurCity server, several scripts were designed.
+In this section, we describe these scripts and their purpose.
+
+The scripts assume the existance of a `config.xml`, located in the same directory as the scripts.
+This configuration file specifies several properties, namely:
+
+```XML
+<config>
+			<!-- MySQL/MariaDB properties -->
+        <repository>
+          <user val='user'/>
+          <password val='password'/>
+        </repository>   
+			<!-- Map view box -->
+        <map>
+          <bottom-left lat="38.7260" lon="-9.1620"/>
+          <top-right lat="38.7553" lon="-9.1249"/>
+        </map>
+</config>
+```
+| setup-db.py |
+| --- |
+| This script sets up the database schema, which is employed in CycleOurCity. |
+
+| setup-osm-data.py |
+| --- |
+| Given the defined viewbox values, this script fetches an osm data file. This file is then used by CycleOurCity to generate a graph, and populate the streetedges knowledge of the system. The file is stored in an `otp` folder, located at the `$HOME$` environment variable. |
+
 * * * 
 
 ## Modules
