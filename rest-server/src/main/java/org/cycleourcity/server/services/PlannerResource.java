@@ -58,7 +58,6 @@ public class PlannerResource {
 	}
 	
 
-	//TODO: este método pode ser autenticado ou nao... como proceder?
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

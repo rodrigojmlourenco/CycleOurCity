@@ -1,6 +1,22 @@
 # CycleOurCity
 CycleOurCity
 
+* * * 
+
+## Software Requirements
+
+| Software Requirements |
+| --- |
+| Maven (v3) |
+| Java 1.8 |
+| MySQL (preferably MariaDB) |
+| Python |
+
+| Maven Dependencies (Not found in a maven remore repository)|
+| --- |
+| GeoTools ([Maven Instalation Guide](http://docs.geotools.org/latest/userguide/tutorial/quickstart/maven.html)) |
+| OpenTripPlanner - [CycleOurCity Fork](https://github.com/rodrigojmlourenco/OpenTripPlanner) |
+
 * * *
 
 ## Running the Project for the First Time

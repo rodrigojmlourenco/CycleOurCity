@@ -1,198 +1,321 @@
-/* Author: Nelson Nunes */
+/*******************************************************************************
+********************************************************************************
+********************************************************************************
+*******************************************************************************/
 
-//variavel global
-var MyApp = {};
-
-//rectangulo que representa a área de planeamento de trajectos
-MyApp.bounds = [[38.6915, -9.2295], [38.7957, -9.0896]];
-
-//nao permite multiplas submissoes do formulario login
-MyApp.AllowSubmitLogin = true;
-
-//Safety and Elevation colors
-MyApp.ClassificationColors = {
-    elevation: new Array('#240002', '#FF2938', '#FFFF00','#99ccff','#3399ff', '#004c99'), /* azul */
-    safety: new Array('#240002', '#FF2938', '#FFFF00', '#96E085', '#549345', '#124706')
+function validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
 }
 
-MyApp.WithoutClassificationsColor = "gray";
-
-
-MyApp.RatingScales = {
-    safety: new Array("Tráfego motorizado normalmente acima dos 50km/h", "Tráfego motorizado normalmente não passa dos 50km/h", "Tráfego motorizado intenso, velocidades normalmente não passam dos 30km/h", "Tráfego motorizado pouco intenso, velocidades normalmente não passam dos 30km/h", "Nenhum tráfego motorizado permitido, peões frequentemente no caminho", "Nenhum tráfego motorizado permitido, poucos ou nenhuns peões no caminho"),
-    elevation: new Array("Subida impraticável para a maioria das pessoas", "Subida com esforço", "Subida sem esforço", "Plano", "Descida suave", "Descida acentuada"),
-    pave: new Array("Empedrado, calçada ou terra batida em boas condições", "Empedrado, calçada ou terra batida difícil de pedalar", "Asfalto/betuminoso em más condições (buracos, desniveis perigosos)", "Asfalto/betuminoso em boas condições"),
-    rails: new Array("Não tem carris", "Tem carris ao nível do pavimento", "Tem carris salientes")
-};
-
-MyApp.SelectedLayer = {
-    color: '#1b1224',
-    weight: 10
-};
-
-//MyApp.URL = 'http://localhost:8080/opentripplanner-api-webapp/ws/plan?';
-MyApp.URL = 'http://cycleourcity.org:8080/opentripplanner-api-webapp/ws/plan?';
-
-MyApp.Server = {
-  url   : 'http://localhost:8080/cycleourcity',
-  auth  : url+'/auth',
-  users : url+'/users',
-  route : url+'/route',
-  street: url+'/streets',
-  trips : url+'/trip'
+function validateUsername(username){
+  var re = /^[a-z0-9_]{5,10}$/;
+  return re.test(username);
 }
 
-MyApp.Map = null;
+function validatePassword(password){
+  var re = /(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
+  return re.test(password);
+}
 
-MyApp.Layers = {
-    //tab1
-    layersGroupLegs: null,
-    featureGroupStreetEdges: null,
+/*******************************************************************************
+********************************************************************************
+********************************************************************************
+*******************************************************************************/
 
-    //tab2
-    layersGroupStreetEdges: null
+function AuthService(url){
+
+  //Private Attributes
+  var token = false;
+  var serviceURL = url + "/auth";
+
+  this.getToken = function(){
+    return token;
+  };
+
+  this.setToken = function(t){
+    token = t;
+  };
+
+  this.getServiceURL = function(){
+    return serviceURL;
+  }
 };
 
-MyApp.SwitchLayerControl = null;
+AuthService.prototype = {
 
-//Tab1
-MyApp.Markers = {
-    startAtMarker: null,
-    endAtMarker: null
+  login : function(username, password){
+
+    //Step 1 - Validate the fields to avoid unecessary requests
+    if(!validateUsername(username))
+      return {error: 1, msg : "Invalid Username"};
+
+    if(!validatePassword(password))
+      return {error: 2, msg : "Invalid Password"};
+
+    //Step 2 - Perform the request
+    jQuery.ajax({
+      type : "POST",
+      url  : this.getServiceURL()+"/login?user="+username+"&password="+password,
+      contentType : "application/json",
+      dataType: "json",
+      success : function(data, xhr, status){
+        result = JSON.parse(data);
+        this.setToken(result.token);
+        return true;
+      },
+      complete: function(xhr, status){
+        return {error:3, msg: "Unable to login"};
+      }
+    });
+  },
+
+  logout : function(){
+    if(!token)
+      return {error : 1, msg : "No logged in to logout"};
+
+    jQuery.ajax({
+      type: "POST",
+      url : this.getServiceURL()+"/logout",
+      beforeSend: function(request){
+        request.setRequestHeader("Authorization", "Bearer "+this.getToken());
+      },
+      success : function(data, xhr, status){
+        this.setToken(false);
+        return true;
+      }
+    });
+    return false;
+  },
+
+  getHeaderToken : function(){
+    return "Bearer " + this.getToken();
+  }
 };
 
-//Tab2
-MyApp.MarkersTab2 = {
-    startAtMarker: null,
-    endAtMarker: null
-};
+/*******************************************************************************
+*******************************************************************************/
 
+function UserService(url){
+  var serviceURL = url + "/users"
 
-MyApp.Polylines = {
-    polylineStreetEdges: null
-};
+  this.getServiceURL = function(){
+    return serviceURL;
+  }
+}
 
-//StreetEdges Colors
-MyApp.StreetEdgeColor = 'red';
+UserService.prototype = {
 
-//Legs Colors
-MyApp.BicycleLegColor = 'black';
-MyApp.WalkLegColor = 'yellow';
+  registerUser : function(username, email, password, confirmPassword){
 
-//MyApp.LegsObtainedWithoutRatings = 'yellow';
+    //Step 1 - Validate the fields (white/blacklist)
+    if(!validateUsername(username))
+      return { error : 1, msg: "Invalid Username" };
 
-MyApp.LastPlannedTrip = {
-    response: null,
-    hasWalkMode: false
-};
+    if(!validateEmail(email))
+      return { error : 2, msg: "Invalid Email" };
 
-// usado para planear a partida e a chegada
-MyApp.LastPointClicked = null;
+    if(!validatePassword(password))
+      return { error : 3, msg: "Invalid Password" };
 
-MyApp.LastValidDeparture = {
-    point: null,
-    address: ""
-};
+    if(!(password == confirmPassword))
+      return { error : 4, msg: "Passwords dont match" };
 
-MyApp.LastValidArrival = {
-    point: null,
-    address: ""
-};
+    //Step 2 - Encode the request as json string
+    request = {
+      username : username,
+      email : email,
+      password : password,
+      confirmPassword : confirmPassword };
 
-MyApp.Icons = {
-    startFlagIcon: L.icon({
-        iconUrl: 'images/marker-flag-start.png',
-        iconSize: [43, 41],
-        iconAnchor: [43, 41]
-    }),
-    endFlagIcon: L.icon({
-        iconUrl: 'images/marker-flag-end.png',
-        iconSize: [43, 41],
-        iconAnchor: [43, 41]
-    }),
-    startIcon: L.icon({
-        iconUrl: 'images/flag_marker_green.png',
-        iconSize: [32, 37],
-        iconAnchor: [16, 37]
-    }),
-    endIcon: L.icon({
-        iconUrl: 'images/flag_marker_red.png',
-        iconSize: [32, 37],
-        iconAnchor: [16, 37]
-    })
-};
+    request = JSON.stringify(request);
+    //Step 3 - Perform the request jQuery.ajax(POST)
+    jQuery.ajax({
+      type: "POST",
+      url : this.getServiceURL(),
+      data: request,
+      contentType: "application/json",
+      success : function(result, status, xhr){
+        return true;
+      },
+      complete: function(xhr, status){
+        if(status != "success")
+          return { error : 4, msg: "Invalid Password" };
+        else
+          return true;
+      }
+    });
+  },
 
-MyApp.ElevationColorsLegend = makeElevationLegend();
-MyApp.SafetyColorsLegend = makeSafetyLegend();
+  changePassword : function(original, newPass, newConfirm, token){
+    console.log("TODO: UserService - changePassword");
+    //Step 1 - Validate the fields (white/blacklist)
+    //Step 2 - Encode the request
+    //Step 3 - Perform the request jQuery.ajax(POST) + Add token as header Authorization
+    //Step 4 - Return true if successfull, false otherwise.
+    return true;
+  }
+}
 
-MyApp.Spinner = {
-    opts: {
-            lines: 7, // The number of lines to draw
-            length: 0, // The length of each line
-            width: 5, // The line thickness
-            radius: 4, // The radius of the inner circle
-            corners: 1, // Corner roundness (0..1)
-            rotate: 0, // The rotation offset
-            direction: 1, // 1: clockwise, -1: counterclockwise
-            color: '#000', // #rgb or #rrggbb or array of colors
-            speed: 1, // Rounds per second
-            trail: 60, // Afterglow percentage
-            shadow: false, // Whether to render a shadow
-            hwaccel: false, // Whether to use hardware acceleration
-            className: 'spinner', // The CSS class to assign to the spinner
-            zIndex: 2e9, // The z-index (defaults to 2000000000)
-            top: '5', // Top position relative to parent in px
-            left: '340' // Left position relative to parent in px P
-    }
-};
+/*******************************************************************************
+*******************************************************************************/
+function PlanningService(serverURL){
+  var serviceURL = serverURL + "/route";
 
-function makeElevationLegend(){
-    var classes = new Array('red1','red2','yellow','blue1','blue2','blue3');
-    var elevationColorsLegend = "<ul id='elevationLegend'>";
+  this.getServiceURL = function(){
+    return serviceURL;
+  }
+}
 
-    for(var i = 0; i < 6; i++){
-        elevationColorsLegend += "<li><span class='" + classes[i] + "'></span> " +
-        MyApp.RatingScales.elevation[i] + "</li>";
-    }
+PlanningService.prototype = {
+  planRoute : function(from, to, safety, elevation, time){
+    console.log("TODO: PlanningService - planRoute");
+  },
 
-    elevationColorsLegend += "<li><span class='" + MyApp.WithoutClassificationsColor + "'></span> " +
-    "Troço sem classificações" + "</li>";
+  planAndSaveRoute : function(from, to, safety, elevation, time, token){
+    console.log("TODO: PlanningService - planAndSaveRoute");
+  }
+}
 
-    elevationColorsLegend += "</ul>";
+/*******************************************************************************
+*******************************************************************************/
+function StreetRatingService(serverURL){
+  var serviceURL = serverURL + "/streets";
 
-    return elevationColorsLegend;
+  this.getServiceURL = function(){
+    return serviceURL;
+  }
+}
+
+StreetRatingService.prototype = {
+  rateTrip : function(tripId, ratings, token){
+    if(!token)
+      return {error : 1, msg : "This operation requires an authenticated user."};
+
+    jQuery.ajax({
+      type: "POST",
+      url : this.getServiceURL(),
+      contentType : "application/json",
+      dataType : "json",
+      beforeSend : function(request){
+        request.setRequestHeader("Authorization", "Bearer "+token);
+      },
+      success : function(data, xhr, status){
+        return true;
+      }
+    });
+
+    return { error : 2, msg : "Unable to classify this trip"};
+  },
+
+  getStreetGeometries : function(){
+    jQuery.ajax({
+      type: "GET",
+      url : this.getServiceURL(),
+      contentType: "application/json",
+      dataType : "json",
+      success : function(data, xhr, status){
+        return JSON.parse(data);
+      }
+    });
+
+    return {error : 1, msg: "Unable to fetch the streets geometries"}
+  }
+}
+
+/*******************************************************************************
+*******************************************************************************/
+function TripService(serverURL){
+  var serviceURL = serverURL + "/streets";
+
+  this.getServiceURL = function(){
+    return serviceURL;
+  }
+}
+
+TripService.prototype = {
+  listUserTrips : function(token){
+
+    if(!token)
+      return {error: 1, msg : "Unauthenticated user."}
+
+    jQuery.ajax({
+      type:"GET",
+      url : this.getServiceURL()+"/list",
+      contentType: "application/json",
+      dataType : "json",
+      beforeSend : function(request){
+        request.setRequestHeader("Authorization", "Bearer "+token);
+      },
+      success : function(data, xhr, status){
+        return JSON.parse(data);
+      }
+    });
+
+    return {error :2 , msg : "Unable to complete the operation"};
+  },
+
+  getTripDetails : function(tripId, token){
+    if(!token)
+      return { error : 1 , msg : "Unauthenticated user"};
+
+    jQuery.ajax({
+      type:"GET",
+      url : this.getServiceURL()+"/list/"+tripId,
+      contentType:"application/json",
+      dataType:"json",
+      beforeSend : function(request){
+        request.setRequestHeader("Authorization", "Bearer "+token);
+      },
+      success : function(data, xhr, status){
+        return JSON.parse(data);
+      }
+    });
+
+    return {error:2, msg:"UNable to complete the operation."};
+  }
 }
 
 
-function makeSafetyLegend(){
-    var classes = new Array('red1','red2','yellow','green1','green2','green3');
-    var safetyColorsLegend = "<ul id='safetyLegend'>";
+/*******************************************************************************
+********************************************************************************
+********************************************************************************
+*******************************************************************************/
 
-    for(var i = 5; i >= 0; i--){
-        safetyColorsLegend += "<li><span class='" + classes[i] + "'></span> " +
-        MyApp.RatingScales.safety[i] + "</li>";
-    }
+function CycleOurCity(serverURL) {
+  this.serverURL  = serverURL;
 
-    safetyColorsLegend += "<li><span class='" + MyApp.WithoutClassificationsColor + "'></span> " +
-    "Troço sem classificações" + "</li>";
+  this.authService      = new AuthService(serverURL);
+  this.userService      = new UserService(serverURL);
+  this.plannerService   = new PlanningService(serverURL);
+  this.tripService      = new TripService(serverURL);
+  this.streetsService   = new StreetRatingService(serverURL);
 
-    safetyColorsLegend += "</ul>";
+  this.getServerURL = function(){
+    return serverURL;
+  };
+};
 
-    return safetyColorsLegend;
-}
+CycleOurCity.prototype = {
 
-function setDepartureSpinnerOn(domId){
-    jQuery(domId).spin(MyApp.Spinner.opts);
-}
 
-function setArrivalSpinnerOn(domId){
-    jQuery(domId).spin(MyApp.Spinner.opts);
-}
+  getAuthService : function(){
+    return this.authService;
+  },
 
-function setArrivalSpinnerOff(domId){
-    jQuery(domId).spin(false);
-}
+  getUserService : function () {
+    return this.userService;
+  },
 
-function setDepartureSpinnerOff(domId){
-    jQuery(domId).spin(false);
+  getPlanningService : function(){
+    return this.plannerService;
+  },
+
+  getStreetRatingService : function(){
+    return this.streetsService;
+  },
+
+  getTripService : function(){
+    return this.tripService;
+  }
 }
