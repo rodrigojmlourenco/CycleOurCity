@@ -11,15 +11,15 @@
 
 package org.cycleourcity.server;
 
+import java.io.IOException;
+import java.net.URI;
+
 import org.cycleourcity.server.app.CycleOurCityApp;
 import org.cycleourcity.server.middleware.CycleOurCityManager;
 import org.cycleourcity.server.middleware.CycleOurCitySecurityManager;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-
-import java.io.IOException;
-import java.net.URI;
 
 /**
  * Main class.
@@ -56,10 +56,10 @@ public class Main {
      */
     public static void main(String[] args) throws IOException {
 
-    	//CycleOurCityManager.getInstance();
-    	//CycleOurCitySecurityManager.getManager();
-    	
     	final HttpServer server = startServer();
+    	
+    	CycleOurCityManager.getInstance();
+    	CycleOurCitySecurityManager.getManager();
     	
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
