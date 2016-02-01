@@ -62,13 +62,20 @@ public class CycleOurCityManager {
 	
 	private static CycleOurCityManager MANAGER = new CycleOurCityManager();
 	
+	private final String BASE_DIR = System.getenv("HOME")+"/otp";
+	
 	private CycleOurCityManager(){
 		
 		try{
-			this.otpManager	= new OTPGraphManager(true, "/var/otp");
+			this.otpManager	= new OTPGraphManager(true, BASE_DIR);
 		}catch(Exception e){
 			LOG.error(e.getMessage()+" - Creating a new graph from scratch");
-			this.otpManager	= new OTPGraphManager("/var/otp");
+			try{
+				this.otpManager	= new OTPGraphManager(BASE_DIR);
+			}catch(NullPointerException e2){
+				LOG.error("No osm files found at '"+BASE_DIR+"'");
+				throw new RuntimeException(e2);
+			}
 		}
 		
 		this.accountManager		= AccountManagementDriverImpl.getManager();
