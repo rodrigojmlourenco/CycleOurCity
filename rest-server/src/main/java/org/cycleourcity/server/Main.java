@@ -35,8 +35,17 @@ public class Main {
      */
     public static HttpServer startServer() {
         //final ResourceConfig rc = new ResourceConfig().packages("org.cycleourcity.server.services");
-    	final ResourceConfig app = new CycleOurCityApp();
-        return GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), app);
+    	
+    	HttpServer server = null;
+    	
+    	try{
+    		final ResourceConfig app = new CycleOurCityApp();
+    		server = GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), app);
+    		return server;
+    	}catch(Exception e){
+    		if(server != null) server.shutdown();
+    		throw e;
+    	}
     }
 
     /**
