@@ -27,7 +27,7 @@ import org.glassfish.jersey.server.ResourceConfig;
  */
 public class Main {
     // Base URI the Grizzly HTTP server will listen on
-	private static final String port = "8092";
+	private static final String port = "8081";
     public static final String BASE_URI = "http://localhost:"+port+"/cycleourcity/";
 
     /**
