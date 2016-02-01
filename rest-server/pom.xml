@@ -88,8 +88,7 @@
 		<dependency>
 			<groupId>org.opentripplanner</groupId>
 			<artifactId>otp</artifactId>
-			<version>0.20.0-SNAPSHOT</version>
-			<type>pom.lastUpdated</type>
+			<version>0.20.0-CYCLEOURCITY</version>
 		</dependency>
 	</dependencies>
 

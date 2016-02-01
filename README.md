@@ -51,6 +51,8 @@ This configuration file specifies several properties, namely:
 | --- |
 | Given the defined viewbox values, this script fetches an osm data file. This file is then used by CycleOurCity to generate a graph, and populate the streetedges knowledge of the system. The file is stored in an `otp` folder, located at the `$HOME$` environment variable. |
 
+> __IMPORTANT__ Before the CycleOurCity server is deployed, these two scripts must first be executed.
+
 * * * 
 
 ## Modules

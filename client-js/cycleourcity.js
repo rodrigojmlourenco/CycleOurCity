@@ -169,8 +169,66 @@ function PlanningService(serverURL){
 
 PlanningService.prototype = {
   planRoute : function(from, to, safety, elevation, time){
-    console.log("TODO: PlanningService - planRoute");
+
+    var request = {
+      fromLat: from.lat, fromLon: from.lon,
+      toLat : to.lat, toLon : to.lon,
+      safetyPref : safety,
+      elevationPref : elevation,
+      timePref : time };
+
+      /*
+    jQuery.ajax({
+      method: "POST",
+      url : this.getServiceURL(),
+      contentType : "application/json",
+      dataType: "json",
+      data : request,
+      success : function(data, xhr, status){
+        console.log(data);
+        console.log(xhr);
+        console.log(status);
+        return false;
+      },
+      complete : function(xhr, status){
+        console.log(xhr);
+        console.log(status);
+        return false;
+      }
+    }).done(function(data){console.log(data);});
+    */
+      /*
+      var handler = function(data, status, xhr){
+        console.log(data);
+        console.log(xhr);
+        console.log(status);
+        return false;
+      };
+
+      jQuery.post(this.getServiceURL(),JSON.stringify(request),handler, "json");*/
+
+      jQuery.ajax({
+        method: "GET",
+        url : this.getServiceURL()+"/test",
+        contentType : "application/json",
+        dataType: "jsonp",
+        success : function(data, xhr, status){
+          console.log(data);
+          console.log(xhr);
+          console.log(status);
+          return false;
+        },
+        error: function(xhr, status, error) {
+          //var err = eval("(" + xhr.responseText + ")");
+          //alert(err.Message);
+          console.log("xhr: "+xhr.responseText);
+          console.log("status: "+status);
+          console.log("error: "+error);
+        }
+      }).done(function(data){console.log(data);});
+
   },
+
 
   planAndSaveRoute : function(from, to, safety, elevation, time, token){
     console.log("TODO: PlanningService - planAndSaveRoute");
@@ -319,3 +377,5 @@ CycleOurCity.prototype = {
     return this.tripService;
   }
 }
+
+var coc = new CycleOurCity("http://localhost:8080/cycleourcity");

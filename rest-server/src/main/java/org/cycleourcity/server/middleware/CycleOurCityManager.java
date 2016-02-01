@@ -44,6 +44,8 @@ import org.opentripplanner.api.model.TripPlan;
 import org.opentripplanner.api.model.WalkStep;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.graph.Edge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -51,15 +53,24 @@ import com.google.gson.JsonObject;
 
 public class CycleOurCityManager {
 
-	private final OTPGraphManager				otpManager;
-	private final AccountManagementDriver		accountManager;
-	private final StreetEdgeManagementDriver	streetEdgeManager;
+	private static Logger LOG = LoggerFactory.getLogger(CycleOurCityManager.class);
+	
+	private OTPGraphManager				otpManager;
+	private AccountManagementDriver		accountManager;
+	private StreetEdgeManagementDriver	streetEdgeManager;
 	
 	
 	private static CycleOurCityManager MANAGER = new CycleOurCityManager();
 	
 	private CycleOurCityManager(){
-		this.otpManager			= new OTPGraphManager(true, "/var/otp");
+		
+		try{
+			this.otpManager	= new OTPGraphManager(true, "/var/otp");
+		}catch(Exception e){
+			LOG.error(e.getMessage()+" - Creating a new graph from scratch");
+			this.otpManager	= new OTPGraphManager("/var/otp");
+		}
+		
 		this.accountManager		= AccountManagementDriverImpl.getManager();
 		this.streetEdgeManager	= StreetEdgeManagementDriverImpl.getManager();
 	}
