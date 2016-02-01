@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 import sys
 import mysql.connector as mariadb
 import xml.etree.ElementTree as ET
 
-config_path = "./config.xml"
+config_path = "/var/cycleourcity/config.xml"
 
 config = ET.parse(config_path).getroot()
-osm	 = ET.parse(map_path).getroot()
+osm	 = ET.parse(config_path).getroot()
 
 repository 	= None
 
@@ -43,7 +44,7 @@ if input == 'n' or input == 'N':
 	sys.exit()
 	
 
-cleanup = "DROP DATABASE "+database
+cleanup = "DROP DATABASE IF EXISTS "+database
 cursor.execute(cleanup)
 mariadb_connection.commit()
 
