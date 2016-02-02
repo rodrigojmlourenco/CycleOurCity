@@ -22,6 +22,7 @@ CycleOurCity
 ## Running the Project for the First Time
 
 ### Scripts
+> The following package is required `sudo apt-get install python-mysql.connector`
 
 To ease the deployment of a CycleOurCity server, several scripts were designed.
 In this section, we describe these scripts and their purpose.
