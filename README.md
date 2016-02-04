@@ -27,7 +27,7 @@ CycleOurCity
 To ease the deployment of a CycleOurCity server, several scripts were designed.
 In this section, we describe these scripts and their purpose.
 
-The scripts assume the existance of a `config.xml`, located in the same directory as the scripts.
+The scripts assume the existance of a `config.xml`, located in the `/var/cycleourcity` directory.
 This configuration file specifies several properties, namely:
 
 ```XML
