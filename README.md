@@ -1,6 +1,11 @@
 # CycleOurCity
-CycleOurCity
 
+TODOs
+
+- [ ] Send email with activation token after user registry.
+- [ ] Create worker that consumes the classifications in the database and updates the graph.
+- [ ] Create worker that clear the black listed and expired session tokens.
+- [ ] Create test-suite for the `driver` module.
 * * * 
 
 ## Software Requirements
@@ -11,6 +16,12 @@ CycleOurCity
 | Java 1.8 |
 | MySQL (preferably MariaDB) |
 | Python |
+
+| Python Dependencies |
+| --- |
+| Python Pip | 
+| MySQL Connector (`sudo apt-get install python-mysql.connector`) |
+| Wget (`sudo pip install wget`) |
 
 | Maven Dependencies (Not found in a maven remore repository)|
 | --- |
