@@ -11,8 +11,15 @@
 
 package org.cycleourcity.server.middleware;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -80,6 +87,8 @@ public class CycleOurCityManager {
 		
 		this.accountManager		= AccountManagementDriverImpl.getManager();
 		this.streetEdgeManager	= StreetEdgeManagementDriverImpl.getManager();
+		
+		scheduleGraphUpdaterTask();
 	}
 	
 	public static CycleOurCityManager getInstance(){
@@ -158,16 +167,12 @@ public class CycleOurCityManager {
 		for(JsonElement e : streetEdges){
 			aux = (JsonObject) e;
 
-			/*
-			 * TODO: descomentar
-			 * 
 			tripEdge = new SimplifiedTripEdge(
-					aux.get("streetEdgeId").getAsLong(),
+					aux.get("streetEdgeId").getAsString(),
 					aux.get("geometry").getAsString(),
 					aux.get("isBicycle").getAsBoolean());
 			
 			edges.add(tripEdge);
-			*/
 		}
 			
 		
@@ -253,17 +258,11 @@ public class CycleOurCityManager {
 		return accountManager.activateAccount(token);
 	}
 	
-	/*
-	 ********************************************************
-	 * D - Authentication Function							*
-	 ********************************************************
-	 * These functions enable the authentication of users	*
-	 ********************************************************
-	 */
+	
 	
 	/*
 	 ********************************************************
-	 * E - Trips											*
+	 * D - Trips											*
 	 ********************************************************
 	 ********************************************************
 	 */
@@ -292,37 +291,31 @@ public class CycleOurCityManager {
 	}
 	
 	
-	public static void main(String[] args){
-		
-		CycleOurCityManager man = CycleOurCityManager.getInstance();
+	// Async-Work
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-		List<GeometryRating> geometries = man.getSafetyRatedGeometries();
+	private void scheduleGraphUpdaterTask(){
+		LocalDateTime localNow = LocalDateTime.now();
+		ZoneId zone = ZoneId.systemDefault();
+		ZonedDateTime zonedNow = ZonedDateTime.of(localNow, zone);
+		ZonedDateTime zone2AM;
+		zone2AM = zonedNow.withHour(2).withMinute(0).withSecond(0);
 		
-		/*
-		RoutePlanRequest req = new RoutePlanRequest(
-								38.7495721,-9.142133, //From
-								38.7423355,-9.1399701, //To
-								0.2f,0.2f,0.6f);
+		if(zonedNow.compareTo(zone2AM)>0)
+			zone2AM = zone2AM.plusDays(1);
 		
-		TripPlan plan;
-		try {
-			RoutePlanner planner = man.planRoute(req);
-			planner.run();
-			plan = planner.getTripPlan();
+		Duration duration = Duration.between(zonedNow, zone2AM);
+		long initDelay = duration.getSeconds();
+		
+		scheduler.scheduleAtFixedRate(new GraphUpdaterTask(), initDelay, 24*60*60, TimeUnit.SECONDS);
+	}
+	
+	private class GraphUpdaterTask implements Runnable{
 
-			//Step 2 - Save the trip and its street edges
-			try {
-				man.saveTrip("bonobo2", plan);
-			} catch (UnknownUserException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnableToPerformOperation e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (InvalidPreferenceSetException e) {
-			e.printStackTrace();
+		@Override
+		public void run() {
+			otpManager.integrateCycleOurCityRatings();
 		}
-		*/
+		
 	}
 }

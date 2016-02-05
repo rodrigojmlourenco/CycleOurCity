@@ -20,6 +20,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -80,6 +83,8 @@ public class CycleOurCitySecurityManager {
 		} catch (IOException e) {
 			throw new SecretKeyNotFoundException();
 		}
+		
+		scheduleCleanerTask();
 	}
 
 	/**
@@ -284,8 +289,14 @@ public class CycleOurCitySecurityManager {
 			}
 		}
 	}
+	//Async-Work
+	private final ScheduledExecutorService scheduledService = Executors.newScheduledThreadPool(1);
 	
-	private class ClearnerTask extends TimerTask{
+	private void scheduleCleanerTask(){
+		scheduledService.scheduleAtFixedRate(new ClearnerTask(), 1*60*60, 1*60*60, TimeUnit.SECONDS);
+	}
+	
+	private class ClearnerTask implements Runnable{
 
 		@Override
 		public void run() {
@@ -305,4 +316,6 @@ public class CycleOurCitySecurityManager {
 			}
 		}
 	}
+	
+	
 }
